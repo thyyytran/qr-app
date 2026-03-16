@@ -37,18 +37,18 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c4b5fd;
+  background: #6ee7b7;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #7c3aed;
+  background: #059669;
 }
 
 /* Firefox scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #c4b5fd #f3f4f6;
+  scrollbar-color: #6ee7b7 #f3f4f6;
 }
 
 /* Smooth transitions for all interactive elements */
@@ -75,10 +75,10 @@ textarea {
 .gradient-border-animated {
   background: linear-gradient(
     135deg,
-    #7c3aed,
-    #ec4899,
-    #06b6d4,
-    #7c3aed
+    #059669,
+    #f59e0b,
+    #0d9488,
+    #059669
   );
   background-size: 300% 300%;
   animation: gradient-border-rotate 4s ease infinite;
@@ -93,26 +93,26 @@ textarea {
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+  background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.gradient-text-cyan {
-  background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
+.gradient-text-amber {
+  background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 /* Glow effects */
-.glow-purple {
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+.glow-green {
+  box-shadow: 0 0 20px rgba(5, 150, 105, 0.35);
 }
 
-.glow-pink {
-  box-shadow: 0 0 20px rgba(236, 72, 153, 0.4);
+.glow-amber {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.35);
 }
 
 /* Focus styles */
@@ -120,7 +120,7 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.5);
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.4);
 }
 
 /* Section label style */
@@ -129,7 +129,7 @@ textarea:focus {
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(139, 92, 246, 0.8);
+  color: rgba(5, 150, 105, 0.9);
 }
 
 /* Hover lift effect */
@@ -144,16 +144,16 @@ textarea:focus {
 /* QR preview pulse border */
 @keyframes qr-border-pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4),
-      0 0 0 0 rgba(236, 72, 153, 0.3);
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.3),
+      0 0 0 0 rgba(245, 158, 11, 0.2);
   }
   50% {
-    box-shadow: 0 0 20px 4px rgba(124, 58, 237, 0.3),
-      0 0 40px 8px rgba(236, 72, 153, 0.15);
+    box-shadow: 0 0 20px 4px rgba(5, 150, 105, 0.2),
+      0 0 40px 8px rgba(245, 158, 11, 0.1);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4),
-      0 0 0 0 rgba(236, 72, 153, 0.3);
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.3),
+      0 0 0 0 rgba(245, 158, 11, 0.2);
   }
 }
 

@@ -193,7 +193,7 @@ export default function StylePanel() {
               onClick={() => setCornerSquareType(type)}
               className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all hover-lift flex-1 ${
                 cornersSquareOptions.type === type
-                  ? "border-accent bg-accent/10 text-accent shadow-glow-pink"
+                  ? "border-accent bg-accent/10 text-accent shadow-glow-amber"
                   : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:text-gray-700"
               }`}
               title={label}
@@ -217,7 +217,7 @@ export default function StylePanel() {
               onClick={() => setCornerDotType(type)}
               className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all hover-lift flex-1 ${
                 cornersDotOptions.type === type
-                  ? "border-cyan-500 bg-cyan-500/10 text-cyan-600 shadow-glow-cyan"
+                  ? "border-teal-600 bg-teal-500/10 text-teal-600 shadow-glow-teal"
                   : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:text-gray-700"
               }`}
               title={label}

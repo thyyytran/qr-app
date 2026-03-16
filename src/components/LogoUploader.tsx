@@ -1,13 +1,18 @@
 "use client";
 
-import { useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { useQRStore } from "@/store/qrStore";
 
 function upscaleLogo(dataURL: string): Promise<string> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
+      // Only upscale if smaller than 512 — if already larger, keep original
+      if (img.naturalWidth >= 512 && img.naturalHeight >= 512) {
+        resolve(dataURL);
+        return;
+      }
       const SIZE = 512;
       const canvas = document.createElement("canvas");
       canvas.width = SIZE;
@@ -19,36 +24,47 @@ function upscaleLogo(dataURL: string): Promise<string> {
       }
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
-      ctx.drawImage(img, 0, 0, SIZE, SIZE);
+      // Maintain aspect ratio with letterboxing
+      const scale = Math.min(SIZE / img.naturalWidth, SIZE / img.naturalHeight);
+      const w = img.naturalWidth * scale;
+      const h = img.naturalHeight * scale;
+      ctx.drawImage(img, (SIZE - w) / 2, (SIZE - h) / 2, w, h);
       resolve(canvas.toDataURL("image/png"));
     };
-    img.onerror = () => reject(new Error("Failed to load image"));
+    img.onerror = () => resolve(dataURL);
     img.src = dataURL;
   });
 }
 
 export default function LogoUploader() {
   const { image, imageOptions, setLogo, removeLogo, setLogoSize } = useQRStore();
+  // Keep original file URL for crisp preview display
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length === 0) return;
 
       const file = acceptedFiles[0];
+      const objectUrl = URL.createObjectURL(file);
+      setPreviewUrl(objectUrl);
+
       const reader = new FileReader();
       reader.onload = async (e) => {
         const dataURL = e.target?.result as string;
-        try {
-          const upscaled = await upscaleLogo(dataURL);
-          setLogo(upscaled);
-        } catch {
-          setLogo(dataURL);
-        }
+        const upscaled = await upscaleLogo(dataURL);
+        setLogo(upscaled);
       };
       reader.readAsDataURL(file);
     },
     [setLogo]
   );
+
+  const handleRemove = useCallback(() => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    removeLogo();
+  }, [previewUrl, removeLogo]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -60,6 +76,7 @@ export default function LogoUploader() {
   });
 
   const logoSizePct = Math.round(imageOptions.imageSize * 100);
+  const displaySrc = previewUrl ?? image;
 
   return (
     <div className="flex flex-col gap-4">
@@ -68,7 +85,7 @@ export default function LogoUploader() {
           {...getRootProps()}
           className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all ${
             isDragActive
-              ? "border-accent bg-accent/5"
+              ? "border-primary bg-primary/5"
               : "border-gray-200 hover:border-gray-300 bg-gray-50"
           }`}
         >
@@ -76,17 +93,16 @@ export default function LogoUploader() {
           <div className="flex flex-col items-center gap-2">
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                isDragActive ? "bg-accent/10" : "bg-gray-100"
+                isDragActive ? "bg-primary/10" : "bg-gray-100"
               }`}
             >
-              {/* Logo icon */}
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={1.5}
                 className={`w-5 h-5 transition-colors ${
-                  isDragActive ? "text-accent" : "text-gray-400"
+                  isDragActive ? "text-primary" : "text-gray-400"
                 }`}
               >
                 <path
@@ -98,7 +114,7 @@ export default function LogoUploader() {
             </div>
             <p
               className={`text-sm font-medium ${
-                isDragActive ? "text-accent" : "text-gray-500"
+                isDragActive ? "text-primary" : "text-gray-500"
               }`}
             >
               {isDragActive ? "Drop logo here" : "Upload a logo"}
@@ -110,14 +126,15 @@ export default function LogoUploader() {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {/* Logo preview */}
+          {/* Logo preview — use original object URL for sharpness */}
           <div className="flex items-center gap-4">
             <div className="relative w-16 h-16 flex-shrink-0 bg-white rounded-xl flex items-center justify-center border border-gray-200 p-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={image}
+                src={displaySrc ?? ""}
                 alt="Logo"
                 className="w-full h-full object-contain"
+                style={{ imageRendering: "auto" }}
               />
             </div>
             <div className="flex-1">
@@ -126,7 +143,7 @@ export default function LogoUploader() {
                 Error correction is set to H for best logo coverage
               </p>
               <button
-                onClick={removeLogo}
+                onClick={handleRemove}
                 className="mt-2 text-xs text-red-500 hover:text-red-600 transition-colors"
               >
                 Remove logo
@@ -151,7 +168,7 @@ export default function LogoUploader() {
               step={1}
               value={logoSizePct}
               onChange={(e) => setLogoSize(Number(e.target.value) / 100)}
-              className="w-full accent-accent"
+              className="w-full accent-primary h-2"
             />
             <div className="flex justify-between text-gray-400 text-xs">
               <span>10% (small)</span>

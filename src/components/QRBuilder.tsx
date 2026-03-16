@@ -48,7 +48,7 @@ export default function QRBuilder() {
         <div className="text-center mb-10">
           <h1 className="font-heading text-4xl sm:text-5xl font-bold mb-3">
             <span className="gradient-text">Beautiful</span> QR Codes,{" "}
-            <span className="gradient-text-cyan">Instantly</span>
+            <span className="gradient-text-amber">Instantly</span>
           </h1>
           <p className="text-gray-500 text-lg max-w-xl mx-auto">
             Paste a URL, customize the style, upload a logo — download in
