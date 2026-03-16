@@ -159,7 +159,7 @@ export default function StylePanel() {
     <div className="flex flex-col gap-6">
       {/* Dot Styles */}
       <div>
-        <p className="text-white/50 text-xs font-semibold uppercase tracking-widest mb-3">
+        <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">
           Dot Style
         </p>
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
@@ -169,8 +169,8 @@ export default function StylePanel() {
               onClick={() => setDotType(type)}
               className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all hover-lift ${
                 dotsOptions.type === type
-                  ? "border-primary bg-primary/20 text-primary shadow-glow"
-                  : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70"
+                  ? "border-primary bg-primary/10 text-primary shadow-glow"
+                  : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:text-gray-700"
               }`}
               title={label}
             >
@@ -183,7 +183,7 @@ export default function StylePanel() {
 
       {/* Corner Square Styles */}
       <div>
-        <p className="text-white/50 text-xs font-semibold uppercase tracking-widest mb-3">
+        <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">
           Corner Frame
         </p>
         <div className="flex gap-2">
@@ -193,8 +193,8 @@ export default function StylePanel() {
               onClick={() => setCornerSquareType(type)}
               className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all hover-lift flex-1 ${
                 cornersSquareOptions.type === type
-                  ? "border-accent bg-accent/20 text-accent shadow-glow-pink"
-                  : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70"
+                  ? "border-accent bg-accent/10 text-accent shadow-glow-pink"
+                  : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:text-gray-700"
               }`}
               title={label}
             >
@@ -207,7 +207,7 @@ export default function StylePanel() {
 
       {/* Corner Dot Styles */}
       <div>
-        <p className="text-white/50 text-xs font-semibold uppercase tracking-widest mb-3">
+        <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">
           Corner Dot
         </p>
         <div className="flex gap-2">
@@ -217,8 +217,8 @@ export default function StylePanel() {
               onClick={() => setCornerDotType(type)}
               className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all hover-lift flex-1 ${
                 cornersDotOptions.type === type
-                  ? "border-cyan-500 bg-cyan-500/20 text-cyan-400 shadow-glow-cyan"
-                  : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70"
+                  ? "border-cyan-500 bg-cyan-500/10 text-cyan-600 shadow-glow-cyan"
+                  : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:text-gray-700"
               }`}
               title={label}
             >
@@ -230,7 +230,7 @@ export default function StylePanel() {
       </div>
 
       {/* Divider */}
-      <div className="h-px bg-white/5" />
+      <div className="h-px bg-gray-100" />
 
       {/* Colors */}
       <ColorSection />

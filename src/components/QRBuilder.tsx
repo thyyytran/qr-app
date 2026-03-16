@@ -14,7 +14,7 @@ export default function QRBuilder() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-white/5 bg-surface/50 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
@@ -36,7 +36,7 @@ export default function QRBuilder() {
               QRcraft
             </span>
           </div>
-          <p className="text-white/40 text-sm hidden sm:block">
+          <p className="text-gray-400 text-sm hidden sm:block">
             Styled QR Code Generator
           </p>
         </div>
@@ -50,7 +50,7 @@ export default function QRBuilder() {
             <span className="gradient-text">Beautiful</span> QR Codes,{" "}
             <span className="gradient-text-cyan">Instantly</span>
           </h1>
-          <p className="text-white/50 text-lg max-w-xl mx-auto">
+          <p className="text-gray-500 text-lg max-w-xl mx-auto">
             Paste a URL, customize the style, upload a logo — download in
             seconds.
           </p>
@@ -61,31 +61,31 @@ export default function QRBuilder() {
           {/* Left panel: controls */}
           <div className="flex flex-col gap-5 order-2 lg:order-1">
             {/* URL Input */}
-            <div className="glass-card rounded-2xl p-5 border border-white/5">
+            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
               <div className="section-label mb-4">Your Link</div>
               <URLInput />
             </div>
 
             {/* Style Panel */}
-            <div className="glass-card rounded-2xl p-5 border border-white/5">
+            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
               <div className="section-label mb-4">QR Style</div>
               <StylePanel />
             </div>
 
             {/* Image Uploader for palette */}
-            <div className="glass-card rounded-2xl p-5 border border-white/5">
+            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
               <div className="section-label mb-4">Extract Colors from Image</div>
               <ImageUploader />
             </div>
 
             {/* Logo Uploader */}
-            <div className="glass-card rounded-2xl p-5 border border-white/5">
+            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
               <div className="section-label mb-4">Logo Overlay</div>
               <LogoUploader />
             </div>
 
             {/* Download */}
-            <div className="glass-card rounded-2xl p-5 border border-white/5">
+            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
               <div className="section-label mb-4">Export</div>
               <DownloadSection />
             </div>
@@ -93,7 +93,7 @@ export default function QRBuilder() {
 
           {/* Right panel: preview */}
           <div className="order-1 lg:order-2 lg:sticky lg:top-24">
-            <div className="glass-card rounded-2xl p-6 border border-white/5 flex flex-col items-center gap-6">
+            <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm flex flex-col items-center gap-6">
               <div className="section-label self-start">Preview</div>
               <QRPreview />
               <ShareButton />

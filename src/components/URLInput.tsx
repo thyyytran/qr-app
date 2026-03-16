@@ -90,14 +90,14 @@ export default function URLInput() {
             ? "border-primary shadow-glow"
             : inputValue && !isValid
             ? "border-red-500/50"
-            : "border-white/10"
-        } bg-surface-secondary`}
+            : "border-gray-200"
+        } bg-gray-50`}
       >
         {/* Link icon */}
         <div className="pl-4 pr-2 flex-shrink-0">
           <LinkIcon
             className={`w-5 h-5 transition-colors ${
-              isFocused ? "text-primary" : "text-white/30"
+              isFocused ? "text-primary" : "text-gray-400"
             }`}
           />
         </div>
@@ -110,7 +110,7 @@ export default function URLInput() {
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholder="Paste your link here..."
-          className="flex-1 bg-transparent py-3.5 text-white placeholder-white/20 text-sm font-medium outline-none"
+          className="flex-1 bg-transparent py-3.5 text-gray-900 placeholder-gray-400 text-sm font-medium outline-none"
           spellCheck={false}
           autoComplete="off"
           autoCorrect="off"
@@ -123,17 +123,17 @@ export default function URLInput() {
             <>
               <span
                 className={`text-xs font-medium tabular-nums ${
-                  isLong ? "text-amber-400" : "text-white/20"
+                  isLong ? "text-amber-500" : "text-gray-400"
                 }`}
               >
                 {inputValue.length}
               </span>
               <button
                 onClick={handleClear}
-                className="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                className="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
                 aria-label="Clear URL"
               >
-                <XIcon className="w-3 h-3 text-white/60" />
+                <XIcon className="w-3 h-3 text-gray-500" />
               </button>
             </>
           )}
@@ -143,11 +143,11 @@ export default function URLInput() {
       {/* Warnings */}
       <div className="flex items-center justify-between px-1">
         {isLong ? (
-          <p className="text-amber-400 text-xs">
+          <p className="text-amber-500 text-xs">
             Long URLs make denser QR codes — consider using a URL shortener
           </p>
         ) : inputValue && !isValid ? (
-          <p className="text-red-400 text-xs">
+          <p className="text-red-500 text-xs">
             Enter a valid URL (e.g. https://example.com)
           </p>
         ) : (
@@ -158,7 +158,7 @@ export default function URLInput() {
       {/* Quick examples */}
       {!inputValue && (
         <div className="flex flex-wrap gap-2 mt-1">
-          <p className="text-white/30 text-xs w-full mb-1">Try an example:</p>
+          <p className="text-gray-400 text-xs w-full mb-1">Try an example:</p>
           {["https://github.com", "https://example.com", "https://youtube.com"].map(
             (example) => (
               <button
@@ -167,7 +167,7 @@ export default function URLInput() {
                   setInputValue(example);
                   setData(example);
                 }}
-                className="text-xs px-3 py-1 rounded-full bg-white/5 hover:bg-primary/20 hover:text-primary border border-white/10 hover:border-primary/30 text-white/40 transition-all"
+                className="text-xs px-3 py-1 rounded-full bg-gray-100 hover:bg-primary/10 hover:text-primary border border-gray-200 hover:border-primary/30 text-gray-500 transition-all"
               >
                 {example.replace("https://", "")}
               </button>

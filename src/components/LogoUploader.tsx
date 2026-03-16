@@ -4,6 +4,29 @@ import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { useQRStore } from "@/store/qrStore";
 
+function upscaleLogo(dataURL: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const SIZE = 512;
+      const canvas = document.createElement("canvas");
+      canvas.width = SIZE;
+      canvas.height = SIZE;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(dataURL);
+        return;
+      }
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(img, 0, 0, SIZE, SIZE);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = () => reject(new Error("Failed to load image"));
+    img.src = dataURL;
+  });
+}
+
 export default function LogoUploader() {
   const { image, imageOptions, setLogo, removeLogo, setLogoSize } = useQRStore();
 
@@ -13,9 +36,14 @@ export default function LogoUploader() {
 
       const file = acceptedFiles[0];
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const dataURL = e.target?.result as string;
-        setLogo(dataURL);
+        try {
+          const upscaled = await upscaleLogo(dataURL);
+          setLogo(upscaled);
+        } catch {
+          setLogo(dataURL);
+        }
       };
       reader.readAsDataURL(file);
     },
@@ -40,15 +68,15 @@ export default function LogoUploader() {
           {...getRootProps()}
           className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all ${
             isDragActive
-              ? "border-accent bg-accent/10"
-              : "border-white/10 hover:border-white/20"
+              ? "border-accent bg-accent/5"
+              : "border-gray-200 hover:border-gray-300 bg-gray-50"
           }`}
         >
           <input {...getInputProps()} />
           <div className="flex flex-col items-center gap-2">
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                isDragActive ? "bg-accent/20" : "bg-white/5"
+                isDragActive ? "bg-accent/10" : "bg-gray-100"
               }`}
             >
               {/* Logo icon */}
@@ -58,7 +86,7 @@ export default function LogoUploader() {
                 stroke="currentColor"
                 strokeWidth={1.5}
                 className={`w-5 h-5 transition-colors ${
-                  isDragActive ? "text-accent" : "text-white/30"
+                  isDragActive ? "text-accent" : "text-gray-400"
                 }`}
               >
                 <path
@@ -70,12 +98,12 @@ export default function LogoUploader() {
             </div>
             <p
               className={`text-sm font-medium ${
-                isDragActive ? "text-accent" : "text-white/40"
+                isDragActive ? "text-accent" : "text-gray-500"
               }`}
             >
               {isDragActive ? "Drop logo here" : "Upload a logo"}
             </p>
-            <p className="text-white/25 text-xs">
+            <p className="text-gray-400 text-xs">
               PNG or SVG with transparent background works best
             </p>
           </div>
@@ -84,7 +112,7 @@ export default function LogoUploader() {
         <div className="flex flex-col gap-4">
           {/* Logo preview */}
           <div className="flex items-center gap-4">
-            <div className="relative w-16 h-16 flex-shrink-0 bg-white rounded-xl flex items-center justify-center border border-white/10 p-2">
+            <div className="relative w-16 h-16 flex-shrink-0 bg-white rounded-xl flex items-center justify-center border border-gray-200 p-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={image}
@@ -93,13 +121,13 @@ export default function LogoUploader() {
               />
             </div>
             <div className="flex-1">
-              <p className="text-white/70 text-sm font-medium mb-1">Logo overlay active</p>
-              <p className="text-white/30 text-xs">
+              <p className="text-gray-700 text-sm font-medium mb-1">Logo overlay active</p>
+              <p className="text-gray-400 text-xs">
                 Error correction is set to H for best logo coverage
               </p>
               <button
                 onClick={removeLogo}
-                className="mt-2 text-xs text-red-400 hover:text-red-300 transition-colors"
+                className="mt-2 text-xs text-red-500 hover:text-red-600 transition-colors"
               >
                 Remove logo
               </button>
@@ -109,10 +137,10 @@ export default function LogoUploader() {
           {/* Size slider */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <span className="text-white/50 text-xs font-semibold uppercase tracking-wide">
+              <span className="text-gray-500 text-xs font-semibold uppercase tracking-wide">
                 Logo Size
               </span>
-              <span className="text-white/70 text-sm font-bold tabular-nums">
+              <span className="text-gray-700 text-sm font-bold tabular-nums">
                 {logoSizePct}%
               </span>
             </div>
@@ -125,7 +153,7 @@ export default function LogoUploader() {
               onChange={(e) => setLogoSize(Number(e.target.value) / 100)}
               className="w-full accent-accent"
             />
-            <div className="flex justify-between text-white/20 text-xs">
+            <div className="flex justify-between text-gray-400 text-xs">
               <span>10% (small)</span>
               <span>35% (large)</span>
             </div>
@@ -134,10 +162,10 @@ export default function LogoUploader() {
           {/* Change logo */}
           <div
             {...getRootProps()}
-            className="border border-dashed border-white/10 rounded-xl p-3 text-center cursor-pointer hover:border-white/20 transition-all"
+            className="border border-dashed border-gray-200 rounded-xl p-3 text-center cursor-pointer hover:border-gray-300 transition-all bg-gray-50"
           >
             <input {...getInputProps()} />
-            <p className="text-white/30 text-xs">
+            <p className="text-gray-400 text-xs">
               Drop a new logo here to replace
             </p>
           </div>

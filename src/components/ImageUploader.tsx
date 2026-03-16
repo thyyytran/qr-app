@@ -108,15 +108,15 @@ export default function ImageUploader() {
           {...getRootProps()}
           className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
             isDragActive
-              ? "border-primary bg-primary/10"
-              : "border-white/10 hover:border-white/20 bg-white/2"
+              ? "border-primary bg-primary/5"
+              : "border-gray-200 hover:border-gray-300 bg-gray-50"
           }`}
         >
           <input {...getInputProps()} />
           <div className="flex flex-col items-center gap-2">
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                isDragActive ? "bg-primary/20" : "bg-white/5"
+                isDragActive ? "bg-primary/10" : "bg-gray-100"
               }`}
             >
               <svg
@@ -125,7 +125,7 @@ export default function ImageUploader() {
                 stroke="currentColor"
                 strokeWidth={1.5}
                 className={`w-5 h-5 transition-colors ${
-                  isDragActive ? "text-primary" : "text-white/30"
+                  isDragActive ? "text-primary" : "text-gray-400"
                 }`}
               >
                 <path
@@ -137,12 +137,12 @@ export default function ImageUploader() {
             </div>
             <p
               className={`text-sm font-medium transition-colors ${
-                isDragActive ? "text-primary" : "text-white/40"
+                isDragActive ? "text-primary" : "text-gray-500"
               }`}
             >
               {isDragActive ? "Drop image here" : "Drag & drop an image"}
             </p>
-            <p className="text-white/25 text-xs">
+            <p className="text-gray-400 text-xs">
               or click to browse — JPG, PNG, GIF, WebP up to 10MB
             </p>
           </div>
@@ -154,7 +154,7 @@ export default function ImageUploader() {
             <img
               src={thumbnail}
               alt="Uploaded"
-              className="w-full h-full object-cover rounded-xl border border-white/10"
+              className="w-full h-full object-cover rounded-xl border border-gray-200"
             />
             <button
               onClick={handleRemove}
@@ -169,22 +169,22 @@ export default function ImageUploader() {
 
           <div className="flex-1 flex flex-col gap-2">
             {isProcessing ? (
-              <div className="flex items-center gap-2 text-white/50 text-sm">
+              <div className="flex items-center gap-2 text-gray-500 text-sm">
                 <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                 Extracting colors...
               </div>
             ) : error ? (
-              <p className="text-red-400 text-sm">{error}</p>
+              <p className="text-red-500 text-sm">{error}</p>
             ) : sourceImagePalette.length > 0 ? (
               <>
-                <p className="text-white/50 text-xs font-semibold uppercase tracking-wide">
+                <p className="text-gray-500 text-xs font-semibold uppercase tracking-wide">
                   Extracted Palette
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {sourceImagePalette.map((color, i) => (
                     <div
                       key={i}
-                      className="w-7 h-7 rounded-lg border-2 border-white/20 shadow-sm cursor-pointer hover:scale-110 transition-transform"
+                      className="w-7 h-7 rounded-lg border-2 border-gray-200 shadow-sm cursor-pointer hover:scale-110 transition-transform"
                       style={{ backgroundColor: color }}
                       title={color}
                     />

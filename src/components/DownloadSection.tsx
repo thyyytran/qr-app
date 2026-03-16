@@ -65,7 +65,7 @@ export default function DownloadSection() {
     <div className="flex flex-col gap-4">
       {/* Size selector */}
       <div>
-        <p className="text-white/50 text-xs font-semibold uppercase tracking-widest mb-2">
+        <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-2">
           Resolution
         </p>
         <div className="flex gap-2">
@@ -75,8 +75,8 @@ export default function DownloadSection() {
               onClick={() => setSelectedSize(value)}
               className={`flex-1 py-2 rounded-xl text-sm font-semibold border transition-all ${
                 selectedSize === value
-                  ? "bg-primary/20 border-primary text-primary shadow-glow"
-                  : "bg-white/5 border-white/10 text-white/50 hover:border-white/20 hover:text-white/70"
+                  ? "bg-primary/10 border-primary text-primary shadow-glow"
+                  : "bg-gray-50 border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700"
               }`}
             >
               {label}
@@ -113,7 +113,7 @@ export default function DownloadSection() {
         <button
           onClick={() => download("svg")}
           disabled={isDisabled || isDownloading !== null}
-          className="flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-surface-secondary border border-white/10 text-white/80 hover:border-primary/40 hover:text-white hover-lift disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:transform-none transition-all"
+          className="flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 hover:border-primary/40 hover:text-primary hover-lift disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:transform-none transition-all"
         >
           {isDownloading === "svg" ? (
             <>
@@ -132,7 +132,7 @@ export default function DownloadSection() {
       </div>
 
       {isDisabled && (
-        <p className="text-white/25 text-xs text-center">
+        <p className="text-gray-400 text-xs text-center">
           Enter a URL to enable downloads
         </p>
       )}

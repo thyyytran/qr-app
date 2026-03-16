@@ -95,17 +95,17 @@ export default function QRPreview() {
       {/* Preview wrapper with animated gradient border */}
       <div className="relative p-[3px] rounded-2xl gradient-border-animated">
         <div
-          className="relative rounded-2xl overflow-hidden qr-preview-container bg-surface"
+          className="relative rounded-2xl overflow-hidden qr-preview-container bg-white"
           style={{ width: 320, height: 320 }}
         >
           {/* Loading state */}
           {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-surface z-10">
+            <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
               <div className="flex flex-col items-center gap-3">
                 <div
                   className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin"
                 />
-                <p className="text-white/40 text-sm">Loading...</p>
+                <p className="text-gray-400 text-sm">Loading...</p>
               </div>
             </div>
           )}
@@ -126,12 +126,12 @@ export default function QRPreview() {
 
       {/* URL hint */}
       {!store.data && (
-        <p className="text-white/30 text-xs text-center">
+        <p className="text-gray-400 text-xs text-center">
           Enter a URL above to generate your QR code
         </p>
       )}
       {store.data && (
-        <p className="text-white/40 text-xs text-center truncate max-w-xs">
+        <p className="text-gray-400 text-xs text-center truncate max-w-xs">
           {store.data}
         </p>
       )}

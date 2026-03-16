@@ -10,6 +10,7 @@ export default function ShareButton() {
   const [fullUrl, setFullUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [customSlug, setCustomSlug] = useState("");
 
   const handleShare = useCallback(async () => {
     if (!store.data) return;
@@ -36,7 +37,11 @@ export default function ShareButton() {
       const res = await fetch("/api/share", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ config, palette: store.sourceImagePalette }),
+        body: JSON.stringify({
+          config,
+          palette: store.sourceImagePalette,
+          customSlug: customSlug.trim() || undefined,
+        }),
       });
 
       if (!res.ok) {
@@ -52,7 +57,7 @@ export default function ShareButton() {
     } finally {
       setIsLoading(false);
     }
-  }, [store]);
+  }, [store, customSlug]);
 
   const handleCopy = useCallback(async () => {
     if (!fullUrl) return;
@@ -79,10 +84,29 @@ export default function ShareButton() {
     <div className="w-full flex flex-col gap-3">
       {!shareUrl ? (
         <>
+          {/* Custom slug input */}
+          <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
+            <span className="text-gray-400 text-xs font-mono flex-shrink-0">/s/</span>
+            <input
+              type="text"
+              value={customSlug}
+              onChange={(e) => {
+                // Only allow URL-safe chars
+                const val = e.target.value.replace(/[^a-zA-Z0-9_-]/g, "");
+                setCustomSlug(val);
+              }}
+              placeholder="custom-link (optional)"
+              className="flex-1 bg-transparent text-gray-700 text-sm outline-none placeholder-gray-400"
+              maxLength={50}
+              spellCheck={false}
+              autoComplete="off"
+            />
+          </div>
+
           <button
             onClick={handleShare}
             disabled={isDisabled || isLoading}
-            className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 text-white/80 hover:text-white hover-lift disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:transform-none transition-all"
+            className="w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 text-gray-700 hover:text-gray-900 hover-lift disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:transform-none transition-all"
           >
             {isLoading ? (
               <>
@@ -109,34 +133,34 @@ export default function ShareButton() {
             )}
           </button>
           {error && (
-            <p className="text-red-400 text-xs text-center">{error}</p>
+            <p className="text-red-500 text-xs text-center">{error}</p>
           )}
           {isDisabled && (
-            <p className="text-white/20 text-xs text-center">
+            <p className="text-gray-400 text-xs text-center">
               Enter a URL to share this QR code
             </p>
           )}
         </>
       ) : (
         <div className="flex flex-col gap-3 animate-fade-in">
-          <p className="text-white/50 text-xs font-semibold uppercase tracking-widest text-center">
+          <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest text-center">
             Share Link Created
           </p>
 
           {/* URL input + copy */}
-          <div className="flex items-center gap-2 bg-surface-secondary rounded-xl border border-white/10 px-3 py-2">
+          <div className="flex items-center gap-2 bg-gray-50 rounded-xl border border-gray-200 px-3 py-2">
             <input
               type="text"
               readOnly
               value={fullUrl ?? ""}
-              className="flex-1 bg-transparent text-white/70 text-sm outline-none truncate font-mono"
+              className="flex-1 bg-transparent text-gray-700 text-sm outline-none truncate font-mono"
             />
             <button
               onClick={handleCopy}
               className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 copied
-                  ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                  : "bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30"
+                  ? "bg-green-100 text-green-600 border border-green-200"
+                  : "bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20"
               }`}
             >
               {copied ? (
@@ -157,7 +181,7 @@ export default function ShareButton() {
             </button>
           </div>
 
-          <p className="text-white/25 text-xs text-center">
+          <p className="text-gray-400 text-xs text-center">
             Link works forever, no account needed
           </p>
 
@@ -166,8 +190,9 @@ export default function ShareButton() {
             onClick={() => {
               setShareUrl(null);
               setFullUrl(null);
+              setCustomSlug("");
             }}
-            className="text-white/30 text-xs hover:text-white/50 transition-colors text-center"
+            className="text-gray-400 text-xs hover:text-gray-600 transition-colors text-center"
           >
             Generate a new link
           </button>

@@ -28,23 +28,23 @@ function ColorPickerPopover({ color, onChange, label }: ColorPickerPopoverProps)
 
   return (
     <div className="flex items-center justify-between">
-      <span className="text-white/60 text-sm">{label}</span>
+      <span className="text-gray-600 text-sm">{label}</span>
       <div ref={ref} className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:border-white/20 transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:border-gray-300 transition-all"
         >
           <div
-            className="w-5 h-5 rounded-md border border-white/20"
+            className="w-5 h-5 rounded-md border border-gray-200"
             style={{ backgroundColor: color }}
           />
-          <span className="text-xs text-white/60 font-mono uppercase">{color}</span>
+          <span className="text-xs text-gray-600 font-mono uppercase">{color}</span>
         </button>
         {isOpen && (
-          <div className="absolute right-0 top-full mt-2 z-50 rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-surface p-3 animate-slide-up">
+          <div className="absolute right-0 top-full mt-2 z-50 rounded-xl overflow-hidden shadow-lg border border-gray-200 bg-white p-3 animate-slide-up">
             <HexColorPicker color={color} onChange={onChange} />
             <div className="mt-2 flex items-center gap-2">
-              <span className="text-white/40 text-xs font-mono">#</span>
+              <span className="text-gray-400 text-xs font-mono">#</span>
               <input
                 type="text"
                 value={color.replace("#", "")}
@@ -54,7 +54,7 @@ function ColorPickerPopover({ color, onChange, label }: ColorPickerPopoverProps)
                     if (val.length === 6) onChange("#" + val);
                   }
                 }}
-                className="flex-1 bg-surface-secondary text-white/80 text-xs font-mono px-2 py-1 rounded-md border border-white/10 outline-none"
+                className="flex-1 bg-gray-50 text-gray-800 text-xs font-mono px-2 py-1 rounded-md border border-gray-200 outline-none"
                 maxLength={6}
                 placeholder="7C3AED"
               />
@@ -135,21 +135,21 @@ export default function ColorSection() {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-white/50 text-xs font-semibold uppercase tracking-widest">
+      <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest">
         Colors
       </p>
 
       {/* Dot color — solid/gradient toggle */}
-      <div className="bg-surface-secondary rounded-xl p-4 flex flex-col gap-4">
+      <div className="bg-gray-50 rounded-xl p-4 flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <span className="text-white/70 text-sm font-medium">Dot Color</span>
-          <div className="flex gap-1 bg-surface rounded-lg p-1">
+          <span className="text-gray-700 text-sm font-medium">Dot Color</span>
+          <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setUseGradient(false)}
               className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
                 !useGradient
                   ? "bg-primary text-white shadow-glow"
-                  : "text-white/40 hover:text-white/60"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             >
               Solid
@@ -159,7 +159,7 @@ export default function ColorSection() {
               className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
                 useGradient
                   ? "bg-primary text-white shadow-glow"
-                  : "text-white/40 hover:text-white/60"
+                  : "text-gray-500 hover:text-gray-700"
               }`}
             >
               Gradient
@@ -177,14 +177,14 @@ export default function ColorSection() {
           <div className="flex flex-col gap-3">
             {/* Gradient type */}
             <div className="flex items-center justify-between">
-              <span className="text-white/60 text-sm">Type</span>
-              <div className="flex gap-1 bg-surface rounded-lg p-1">
+              <span className="text-gray-600 text-sm">Type</span>
+              <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
                 <button
                   onClick={() => handleGradientType("linear")}
                   className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
                     gradientType === "linear"
-                      ? "bg-white/10 text-white"
-                      : "text-white/40 hover:text-white/60"
+                      ? "bg-white text-gray-800 shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
                   Linear
@@ -193,8 +193,8 @@ export default function ColorSection() {
                   onClick={() => handleGradientType("radial")}
                   className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
                     gradientType === "radial"
-                      ? "bg-white/10 text-white"
-                      : "text-white/40 hover:text-white/60"
+                      ? "bg-white text-gray-800 shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
                   Radial
@@ -216,7 +216,7 @@ export default function ColorSection() {
 
             {/* Gradient preview */}
             <div
-              className="h-6 rounded-lg border border-white/10"
+              className="h-6 rounded-lg border border-gray-200"
               style={{
                 background:
                   gradientType === "linear"
@@ -228,7 +228,7 @@ export default function ColorSection() {
             {/* Rotation (linear only) */}
             {gradientType === "linear" && (
               <div className="flex items-center gap-3">
-                <span className="text-white/60 text-sm flex-shrink-0">
+                <span className="text-gray-600 text-sm flex-shrink-0">
                   Angle
                 </span>
                 <input
@@ -239,7 +239,7 @@ export default function ColorSection() {
                   onChange={(e) => handleGradientRotation(Number(e.target.value))}
                   className="flex-1 accent-primary"
                 />
-                <span className="text-white/40 text-xs w-8 text-right tabular-nums">
+                <span className="text-gray-500 text-xs w-8 text-right tabular-nums">
                   {gradientRotation}°
                 </span>
               </div>
@@ -249,8 +249,8 @@ export default function ColorSection() {
       </div>
 
       {/* Corner colors */}
-      <div className="bg-surface-secondary rounded-xl p-4 flex flex-col gap-3">
-        <span className="text-white/70 text-sm font-medium">Corner Colors</span>
+      <div className="bg-gray-50 rounded-xl p-4 flex flex-col gap-3">
+        <span className="text-gray-700 text-sm font-medium">Corner Colors</span>
         <ColorPickerPopover
           color={cornersSquareOptions.color}
           onChange={setCornerSquareColor}
@@ -264,7 +264,7 @@ export default function ColorSection() {
       </div>
 
       {/* Background color */}
-      <div className="bg-surface-secondary rounded-xl p-4">
+      <div className="bg-gray-50 rounded-xl p-4">
         <ColorPickerPopover
           color={backgroundOptions.color}
           onChange={setBackgroundColor}
