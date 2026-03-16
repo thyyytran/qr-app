@@ -1,10 +1,21 @@
-export type DotType =
+export type StandardDotType =
   | "rounded"
   | "dots"
   | "classy"
   | "classy-rounded"
   | "square"
   | "extra-rounded";
+
+export type CustomDotType = "heart" | "star" | "diamond" | "leaf";
+
+export type DotType = StandardDotType | CustomDotType;
+
+export const CUSTOM_DOT_TYPES: CustomDotType[] = ["heart", "star", "diamond", "leaf"];
+
+export function isCustomDotType(type: DotType): type is CustomDotType {
+  return CUSTOM_DOT_TYPES.includes(type as CustomDotType);
+}
+
 export type CornerSquareType = "dot" | "square" | "extra-rounded";
 export type CornerDotType = "dot" | "square";
 export type GradientType = "linear" | "radial";
@@ -37,7 +48,7 @@ export interface QRConfig {
   backgroundOptions: {
     color: string;
   };
-  image?: string; // base64 data URL for logo overlay
+  image?: string;
   imageOptions: {
     hideBackgroundDots: boolean;
     imageSize: number;
@@ -47,6 +58,6 @@ export interface QRConfig {
 }
 
 export interface AppState extends QRConfig {
-  sourceImagePalette: string[]; // extracted hex colors from uploaded image
+  sourceImagePalette: string[];
   useGradient: boolean;
 }

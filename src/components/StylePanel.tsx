@@ -4,142 +4,126 @@ import { useQRStore } from "@/store/qrStore";
 import { DotType, CornerSquareType, CornerDotType } from "@/types/qr";
 import ColorSection from "./ColorSection";
 
-const DOT_STYLES: { type: DotType; label: string; preview: React.ReactNode }[] =
-  [
-    {
-      type: "square",
-      label: "Square",
-      preview: (
-        <svg viewBox="0 0 20 20" className="w-8 h-8">
-          <rect x="2" y="2" width="7" height="7" fill="currentColor" />
-          <rect x="11" y="2" width="7" height="7" fill="currentColor" />
-          <rect x="2" y="11" width="7" height="7" fill="currentColor" />
-          <rect x="11" y="11" width="7" height="7" fill="currentColor" />
-        </svg>
-      ),
-    },
-    {
-      type: "rounded",
-      label: "Rounded",
-      preview: (
-        <svg viewBox="0 0 20 20" className="w-8 h-8">
-          <rect x="2" y="2" width="7" height="7" rx="2" fill="currentColor" />
-          <rect x="11" y="2" width="7" height="7" rx="2" fill="currentColor" />
-          <rect x="2" y="11" width="7" height="7" rx="2" fill="currentColor" />
-          <rect x="11" y="11" width="7" height="7" rx="2" fill="currentColor" />
-        </svg>
-      ),
-    },
-    {
-      type: "dots",
-      label: "Dots",
-      preview: (
-        <svg viewBox="0 0 20 20" className="w-8 h-8">
-          <circle cx="5.5" cy="5.5" r="3.5" fill="currentColor" />
-          <circle cx="14.5" cy="5.5" r="3.5" fill="currentColor" />
-          <circle cx="5.5" cy="14.5" r="3.5" fill="currentColor" />
-          <circle cx="14.5" cy="14.5" r="3.5" fill="currentColor" />
-        </svg>
-      ),
-    },
-    {
-      type: "classy",
-      label: "Classy",
-      preview: (
-        <svg viewBox="0 0 20 20" className="w-8 h-8">
-          <path d="M2 5a3 3 0 013-3h2v7H2V5z" fill="currentColor" />
-          <path d="M11 2h2a3 3 0 013 3v4h-5V2z" fill="currentColor" />
-          <rect x="2" y="11" width="7" height="7" rx="1" fill="currentColor" />
-          <rect x="11" y="11" width="7" height="7" rx="1" fill="currentColor" />
-        </svg>
-      ),
-    },
-    {
-      type: "classy-rounded",
-      label: "Classy+",
-      preview: (
-        <svg viewBox="0 0 20 20" className="w-8 h-8">
-          <rect x="2" y="2" width="7" height="7" rx="3" fill="currentColor" />
-          <rect x="11" y="2" width="7" height="7" rx="3" fill="currentColor" />
-          <rect x="2" y="11" width="7" height="7" rx="3" fill="currentColor" />
-          <rect x="11" y="11" width="2" height="2" rx="1" fill="currentColor" />
-          <rect x="15" y="11" width="2" height="2" rx="1" fill="currentColor" />
-          <rect x="11" y="15" width="2" height="2" rx="1" fill="currentColor" />
-          <rect x="15" y="15" width="2" height="2" rx="1" fill="currentColor" />
-        </svg>
-      ),
-    },
-    {
-      type: "extra-rounded",
-      label: "Pill",
-      preview: (
-        <svg viewBox="0 0 20 20" className="w-8 h-8">
-          <rect x="2" y="2" width="7" height="7" rx="4" fill="currentColor" />
-          <rect x="11" y="2" width="7" height="7" rx="4" fill="currentColor" />
-          <rect x="2" y="11" width="7" height="7" rx="4" fill="currentColor" />
-          <rect x="11" y="11" width="7" height="7" rx="4" fill="currentColor" />
-        </svg>
-      ),
-    },
-  ];
+interface DotOption {
+  type: DotType;
+  label: string;
+  preview: React.ReactNode;
+}
 
-const CORNER_SQUARE_STYLES: {
+interface CornerSquareOption {
   type: CornerSquareType;
   label: string;
   preview: React.ReactNode;
-}[] = [
+}
+
+interface CornerDotOption {
+  type: CornerDotType;
+  label: string;
+  preview: React.ReactNode;
+}
+
+// ---- Dot shape previews ----
+const sq = (rx = 0) => (
+  <svg viewBox="0 0 24 24" className="w-7 h-7">
+    <rect x="2" y="2" width="9" height="9" rx={rx} fill="currentColor"/>
+    <rect x="13" y="2" width="9" height="9" rx={rx} fill="currentColor"/>
+    <rect x="2" y="13" width="9" height="9" rx={rx} fill="currentColor"/>
+    <rect x="13" y="13" width="9" height="9" rx={rx} fill="currentColor"/>
+  </svg>
+);
+
+const heartSVG = (
+  <svg viewBox="-1 -1 2 2" className="w-7 h-7">
+    <path d="M 0 0.35 C -0.05 0.2 -0.5 0.08 -0.5 -0.15 C -0.5 -0.44 -0.22 -0.52 0 -0.24 C 0.22 -0.52 0.5 -0.44 0.5 -0.15 C 0.5 0.08 0.05 0.2 0 0.35 Z" fill="currentColor"/>
+  </svg>
+);
+
+function StarPreview() {
+  const pts = 5; const outer = 0.72; const inner = 0.3;
+  const d = Array.from({ length: pts * 2 }, (_, i) => {
+    const a = (i * Math.PI) / pts - Math.PI / 2;
+    const r = i % 2 === 0 ? outer : inner;
+    return (i === 0 ? "M" : "L") + (Math.cos(a) * r).toFixed(3) + "," + (Math.sin(a) * r).toFixed(3);
+  }).join(" ") + "Z";
+  return (
+    <svg viewBox="-1 -1 2 2" className="w-7 h-7">
+      <path d={d} fill="currentColor"/>
+    </svg>
+  );
+}
+
+const diamondSVG = (
+  <svg viewBox="-1 -1 2 2" className="w-7 h-7">
+    <path d="M 0 -0.8 L 0.8 0 L 0 0.8 L -0.8 0 Z" fill="currentColor"/>
+  </svg>
+);
+
+const leafSVG = (
+  <svg viewBox="-1 -1 2 2" className="w-7 h-7">
+    <path d="M 0 -0.68 C 0.68 -0.35 0.68 0.35 0 0.68 C -0.68 0.35 -0.68 -0.35 0 -0.68 Z" fill="currentColor"/>
+  </svg>
+);
+
+const DOT_STYLES: DotOption[] = [
+  { type: "square", label: "Square", preview: sq(0) },
+  { type: "rounded", label: "Rounded", preview: sq(2) },
+  { type: "dots", label: "Circle", preview: sq(5) },
+  { type: "extra-rounded", label: "Pill", preview: sq(4) },
+  { type: "heart", label: "Heart", preview: heartSVG },
+  { type: "star", label: "Star", preview: <StarPreview /> },
+  { type: "diamond", label: "Diamond", preview: diamondSVG },
+  { type: "leaf", label: "Leaf", preview: leafSVG },
+];
+
+const CORNER_SQUARE_STYLES: CornerSquareOption[] = [
   {
     type: "square",
     label: "Square",
     preview: (
-      <svg viewBox="0 0 20 20" className="w-7 h-7">
-        <rect x="2" y="2" width="16" height="16" rx="0" fill="none" stroke="currentColor" strokeWidth="3" />
-        <rect x="6" y="6" width="8" height="8" fill="currentColor" />
+      <svg viewBox="0 0 20 20" className="w-6 h-6">
+        <rect x="1" y="1" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="3"/>
+        <rect x="5" y="5" width="10" height="10" fill="currentColor"/>
       </svg>
     ),
   },
   {
     type: "extra-rounded",
-    label: "Rounded",
+    label: "Round",
     preview: (
-      <svg viewBox="0 0 20 20" className="w-7 h-7">
-        <rect x="2" y="2" width="16" height="16" rx="6" fill="none" stroke="currentColor" strokeWidth="3" />
-        <rect x="6" y="6" width="8" height="8" rx="2" fill="currentColor" />
+      <svg viewBox="0 0 20 20" className="w-6 h-6">
+        <rect x="1" y="1" width="18" height="18" rx="5" fill="none" stroke="currentColor" strokeWidth="3"/>
+        <rect x="5" y="5" width="10" height="10" rx="2" fill="currentColor"/>
       </svg>
     ),
   },
   {
     type: "dot",
-    label: "Dot",
+    label: "Circle",
     preview: (
-      <svg viewBox="0 0 20 20" className="w-7 h-7">
-        <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" strokeWidth="3" />
-        <circle cx="10" cy="10" r="4" fill="currentColor" />
+      <svg viewBox="0 0 20 20" className="w-6 h-6">
+        <circle cx="10" cy="10" r="9" fill="none" stroke="currentColor" strokeWidth="3"/>
+        <circle cx="10" cy="10" r="4.5" fill="currentColor"/>
       </svg>
     ),
   },
 ];
 
-const CORNER_DOT_STYLES: {
-  type: CornerDotType;
-  label: string;
-  preview: React.ReactNode;
-}[] = [
+const CORNER_DOT_STYLES: CornerDotOption[] = [
   {
     type: "square",
     label: "Square",
     preview: (
-      <svg viewBox="0 0 20 20" className="w-7 h-7">
-        <rect x="4" y="4" width="12" height="12" fill="currentColor" />
+      <svg viewBox="0 0 20 20" className="w-6 h-6">
+        <rect x="4" y="4" width="12" height="12" fill="currentColor"/>
       </svg>
     ),
   },
   {
     type: "dot",
-    label: "Dot",
+    label: "Circle",
     preview: (
-      <svg viewBox="0 0 20 20" className="w-7 h-7">
-        <circle cx="10" cy="10" r="6" fill="currentColor" />
+      <svg viewBox="0 0 20 20" className="w-6 h-6">
+        <circle cx="10" cy="10" r="6" fill="currentColor"/>
       </svg>
     ),
   },
@@ -147,92 +131,80 @@ const CORNER_DOT_STYLES: {
 
 export default function StylePanel() {
   const {
-    dotsOptions,
-    cornersSquareOptions,
-    cornersDotOptions,
-    setDotType,
-    setCornerSquareType,
-    setCornerDotType,
+    dotsOptions, cornersSquareOptions, cornersDotOptions,
+    setDotType, setCornerSquareType, setCornerDotType,
   } = useQRStore();
 
   return (
     <div className="flex flex-col gap-6">
+
       {/* Dot Styles */}
       <div>
-        <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">
-          Dot Style
-        </p>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+        <p className="section-label mb-3">Dot Shape</p>
+        <div className="grid grid-cols-4 gap-2">
           {DOT_STYLES.map(({ type, label, preview }) => (
             <button
               key={type}
               onClick={() => setDotType(type)}
-              className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all hover-lift ${
-                dotsOptions.type === type
-                  ? "border-primary bg-primary/10 text-primary shadow-glow"
-                  : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:text-gray-700"
-              }`}
               title={label}
+              className={`flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-xl border text-xs font-semibold transition-all hover-lift ${
+                dotsOptions.type === type
+                  ? "border-primary bg-primary/8 text-primary shadow-glow"
+                  : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              }`}
             >
               {preview}
-              <span className="text-[10px] font-semibold">{label}</span>
+              <span>{label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Corner Square Styles */}
+      {/* Corner Frame */}
       <div>
-        <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">
-          Corner Frame
-        </p>
+        <p className="section-label mb-3">Corner Frame</p>
         <div className="flex gap-2">
           {CORNER_SQUARE_STYLES.map(({ type, label, preview }) => (
             <button
               key={type}
               onClick={() => setCornerSquareType(type)}
-              className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all hover-lift flex-1 ${
-                cornersSquareOptions.type === type
-                  ? "border-accent bg-accent/10 text-accent shadow-glow-amber"
-                  : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:text-gray-700"
-              }`}
               title={label}
+              className={`flex flex-col items-center gap-1.5 py-2.5 flex-1 rounded-xl border text-xs font-semibold transition-all hover-lift ${
+                cornersSquareOptions.type === type
+                  ? "border-primary bg-primary/8 text-primary shadow-glow"
+                  : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              }`}
             >
               {preview}
-              <span className="text-[10px] font-semibold">{label}</span>
+              <span>{label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Corner Dot Styles */}
+      {/* Corner Dot */}
       <div>
-        <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest mb-3">
-          Corner Dot
-        </p>
+        <p className="section-label mb-3">Corner Dot</p>
         <div className="flex gap-2">
           {CORNER_DOT_STYLES.map(({ type, label, preview }) => (
             <button
               key={type}
               onClick={() => setCornerDotType(type)}
-              className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all hover-lift flex-1 ${
-                cornersDotOptions.type === type
-                  ? "border-teal-600 bg-teal-500/10 text-teal-600 shadow-glow-teal"
-                  : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300 hover:text-gray-700"
-              }`}
               title={label}
+              className={`flex flex-col items-center gap-1.5 py-2.5 flex-1 rounded-xl border text-xs font-semibold transition-all hover-lift ${
+                cornersDotOptions.type === type
+                  ? "border-primary bg-primary/8 text-primary shadow-glow"
+                  : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              }`}
             >
               {preview}
-              <span className="text-[10px] font-semibold">{label}</span>
+              <span>{label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Divider */}
       <div className="h-px bg-gray-100" />
-
-      {/* Colors */}
       <ColorSection />
     </div>
   );

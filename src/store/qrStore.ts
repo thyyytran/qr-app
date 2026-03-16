@@ -36,18 +36,18 @@ const DEFAULT_STATE: AppState = {
   errorCorrectionLevel: "H",
   dotsOptions: {
     type: "rounded",
-    color: "#7C3AED",
+    color: "#2563EB",
   },
   cornersSquareOptions: {
     type: "extra-rounded",
-    color: "#EC4899",
+    color: "#1D4ED8",
   },
   cornersDotOptions: {
     type: "dot",
-    color: "#EC4899",
+    color: "#2563EB",
   },
   backgroundOptions: {
-    color: "#0F0F1A",
+    color: "#FFFFFF",
   },
   imageOptions: {
     hideBackgroundDots: true,
@@ -104,10 +104,7 @@ export const useQRStore = create<QRStore>((set, get) => ({
     set({ backgroundOptions: { color } }),
 
   setLogo: (image) =>
-    set({
-      image,
-      errorCorrectionLevel: "H",
-    }),
+    set({ image, errorCorrectionLevel: "H" }),
 
   removeLogo: () =>
     set({ image: undefined }),
@@ -127,9 +124,9 @@ export const useQRStore = create<QRStore>((set, get) => ({
     const { sourceImagePalette } = get();
     if (sourceImagePalette.length === 0) return;
 
-    const dotColor = sourceImagePalette[0] ?? "#7C3AED";
-    const cornerColor = sourceImagePalette[1] ?? "#EC4899";
-    const bgColor = sourceImagePalette[sourceImagePalette.length - 1] ?? "#0F0F1A";
+    const dotColor = sourceImagePalette[0] ?? "#2563EB";
+    const cornerColor = sourceImagePalette[1] ?? "#1D4ED8";
+    const bgColor = sourceImagePalette[sourceImagePalette.length - 1] ?? "#FFFFFF";
 
     set((state) => ({
       dotsOptions: { ...state.dotsOptions, color: dotColor, gradient: undefined },
@@ -154,7 +151,7 @@ export const useQRStore = create<QRStore>((set, get) => ({
             rotation: 45,
             colorStops: [
               { offset: 0, color: currentColor },
-              { offset: 1, color: "#EC4899" },
+              { offset: 1, color: "#60A5FA" },
             ],
           },
         },
@@ -162,10 +159,7 @@ export const useQRStore = create<QRStore>((set, get) => ({
     } else {
       set((state) => ({
         useGradient,
-        dotsOptions: {
-          ...state.dotsOptions,
-          gradient: undefined,
-        },
+        dotsOptions: { ...state.dotsOptions, gradient: undefined },
       }));
     }
   },

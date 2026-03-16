@@ -4,59 +4,47 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { HexColorPicker } from "react-colorful";
 import { useQRStore } from "@/store/qrStore";
 
-interface ColorPickerPopoverProps {
-  color: string;
-  onChange: (color: string) => void;
-  label: string;
-}
-
-function ColorPickerPopover({ color, onChange, label }: ColorPickerPopoverProps) {
-  const [isOpen, setIsOpen] = useState(false);
+function ColorPickerPopover({
+  color, onChange, label,
+}: {
+  color: string; onChange: (c: string) => void; label: string;
+}) {
+  const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen]);
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    if (open) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
 
   return (
     <div className="flex items-center justify-between">
       <span className="text-gray-600 text-sm">{label}</span>
       <div ref={ref} className="relative">
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => setOpen(!open)}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:border-gray-300 transition-all"
         >
-          <div
-            className="w-5 h-5 rounded-md border border-gray-200"
-            style={{ backgroundColor: color }}
-          />
+          <div className="w-5 h-5 rounded-md border border-gray-200" style={{ backgroundColor: color }}/>
           <span className="text-xs text-gray-600 font-mono uppercase">{color}</span>
         </button>
-        {isOpen && (
-          <div className="absolute right-0 top-full mt-2 z-50 rounded-xl overflow-hidden shadow-lg border border-gray-200 bg-white p-3 animate-slide-up">
-            <HexColorPicker color={color} onChange={onChange} />
-            <div className="mt-2 flex items-center gap-2">
+        {open && (
+          <div className="absolute right-0 top-full mt-2 z-50 rounded-xl shadow-lg border border-gray-200 bg-white p-3 animate-slide-up">
+            <HexColorPicker color={color} onChange={onChange}/>
+            <div className="mt-2 flex items-center gap-1.5">
               <span className="text-gray-400 text-xs font-mono">#</span>
               <input
                 type="text"
                 value={color.replace("#", "")}
                 onChange={(e) => {
-                  const val = e.target.value;
-                  if (/^[0-9A-Fa-f]{0,6}$/.test(val)) {
-                    if (val.length === 6) onChange("#" + val);
-                  }
+                  if (/^[0-9A-Fa-f]{0,6}$/.test(e.target.value) && e.target.value.length === 6)
+                    onChange("#" + e.target.value);
                 }}
-                className="flex-1 bg-gray-50 text-gray-800 text-xs font-mono px-2 py-1 rounded-md border border-gray-200 outline-none"
-                maxLength={6}
-                placeholder="7C3AED"
+                className="flex-1 bg-gray-50 text-gray-800 text-xs font-mono px-2 py-1 rounded border border-gray-200 outline-none"
+                maxLength={6} placeholder="2563EB"
               />
             </div>
           </div>
@@ -68,180 +56,79 @@ function ColorPickerPopover({ color, onChange, label }: ColorPickerPopoverProps)
 
 export default function ColorSection() {
   const {
-    dotsOptions,
-    cornersSquareOptions,
-    cornersDotOptions,
-    backgroundOptions,
-    useGradient,
-    setDotColor,
-    setDotGradient,
-    setCornerSquareColor,
-    setCornerDotColor,
-    setBackgroundColor,
-    setUseGradient,
+    dotsOptions, cornersSquareOptions, cornersDotOptions, backgroundOptions,
+    useGradient, setDotColor, setDotGradient, setCornerSquareColor,
+    setCornerDotColor, setBackgroundColor, setUseGradient,
   } = useQRStore();
 
-  const [gradientRotation, setGradientRotation] = useState(
-    dotsOptions.gradient?.rotation ?? 45
-  );
-  const [gradientType, setGradientType] = useState<"linear" | "radial">(
-    dotsOptions.gradient?.type ?? "linear"
-  );
-  const [gradientColor1, setGradientColor1] = useState(
-    dotsOptions.gradient?.colorStops[0]?.color ?? dotsOptions.color
-  );
-  const [gradientColor2, setGradientColor2] = useState(
-    dotsOptions.gradient?.colorStops[1]?.color ?? "#EC4899"
-  );
+  const [gradRot, setGradRot] = useState(dotsOptions.gradient?.rotation ?? 45);
+  const [gradType, setGradType] = useState<"linear" | "radial">(dotsOptions.gradient?.type ?? "linear");
+  const [c1, setC1] = useState(dotsOptions.gradient?.colorStops[0]?.color ?? dotsOptions.color);
+  const [c2, setC2] = useState(dotsOptions.gradient?.colorStops[1]?.color ?? "#60A5FA");
 
-  const updateGradient = useCallback(
-    (
-      c1: string = gradientColor1,
-      c2: string = gradientColor2,
-      rot: number = gradientRotation,
-      gType: "linear" | "radial" = gradientType
-    ) => {
-      setDotGradient({
-        type: gType,
-        rotation: gType === "linear" ? rot : undefined,
-        colorStops: [
-          { offset: 0, color: c1 },
-          { offset: 1, color: c2 },
-        ],
-      });
-    },
-    [gradientColor1, gradientColor2, gradientRotation, gradientType, setDotGradient]
+  const pushGrad = useCallback(
+    (nc1 = c1, nc2 = c2, rot = gradRot, type = gradType) =>
+      setDotGradient({ type, rotation: type === "linear" ? rot : undefined, colorStops: [{ offset: 0, color: nc1 }, { offset: 1, color: nc2 }] }),
+    [c1, c2, gradRot, gradType, setDotGradient]
   );
-
-  const handleGradientColor1 = (c: string) => {
-    setGradientColor1(c);
-    updateGradient(c, gradientColor2, gradientRotation, gradientType);
-  };
-
-  const handleGradientColor2 = (c: string) => {
-    setGradientColor2(c);
-    updateGradient(gradientColor1, c, gradientRotation, gradientType);
-  };
-
-  const handleGradientRotation = (rot: number) => {
-    setGradientRotation(rot);
-    updateGradient(gradientColor1, gradientColor2, rot, gradientType);
-  };
-
-  const handleGradientType = (gType: "linear" | "radial") => {
-    setGradientType(gType);
-    updateGradient(gradientColor1, gradientColor2, gradientRotation, gType);
-  };
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-gray-500 text-xs font-semibold uppercase tracking-widest">
-        Colors
-      </p>
+      <p className="section-label">Colors</p>
 
-      {/* Dot color — solid/gradient toggle */}
+      {/* Dot color */}
       <div className="bg-gray-50 rounded-xl p-4 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <span className="text-gray-700 text-sm font-medium">Dot Color</span>
-          <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setUseGradient(false)}
-              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
-                !useGradient
-                  ? "bg-primary text-white shadow-glow"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Solid
-            </button>
-            <button
-              onClick={() => setUseGradient(true)}
-              className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
-                useGradient
-                  ? "bg-primary text-white shadow-glow"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Gradient
-            </button>
+          <div className="flex gap-0.5 bg-gray-200 rounded-lg p-0.5">
+            {(["Solid", "Gradient"] as const).map((label) => {
+              const active = label === "Solid" ? !useGradient : useGradient;
+              return (
+                <button
+                  key={label}
+                  onClick={() => setUseGradient(label === "Gradient")}
+                  className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                    active ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {!useGradient ? (
-          <ColorPickerPopover
-            color={dotsOptions.color}
-            onChange={setDotColor}
-            label="Color"
-          />
+          <ColorPickerPopover color={dotsOptions.color} onChange={setDotColor} label="Color"/>
         ) : (
           <div className="flex flex-col gap-3">
-            {/* Gradient type */}
             <div className="flex items-center justify-between">
               <span className="text-gray-600 text-sm">Type</span>
-              <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => handleGradientType("linear")}
-                  className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
-                    gradientType === "linear"
-                      ? "bg-white text-gray-800 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  Linear
-                </button>
-                <button
-                  onClick={() => handleGradientType("radial")}
-                  className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
-                    gradientType === "radial"
-                      ? "bg-white text-gray-800 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  Radial
-                </button>
+              <div className="flex gap-0.5 bg-gray-200 rounded-lg p-0.5">
+                {(["linear", "radial"] as const).map((t) => (
+                  <button key={t} onClick={() => { setGradType(t); pushGrad(c1, c2, gradRot, t); }}
+                    className={`px-3 py-1 rounded-md text-xs font-semibold capitalize transition-all ${
+                      gradType === t ? "bg-white text-gray-900 shadow-sm" : "text-gray-500"
+                    }`}>
+                    {t}
+                  </button>
+                ))}
               </div>
             </div>
-
-            {/* Colors */}
-            <ColorPickerPopover
-              color={gradientColor1}
-              onChange={handleGradientColor1}
-              label="Start color"
-            />
-            <ColorPickerPopover
-              color={gradientColor2}
-              onChange={handleGradientColor2}
-              label="End color"
-            />
-
-            {/* Gradient preview */}
-            <div
-              className="h-6 rounded-lg border border-gray-200"
-              style={{
-                background:
-                  gradientType === "linear"
-                    ? `linear-gradient(${gradientRotation}deg, ${gradientColor1}, ${gradientColor2})`
-                    : `radial-gradient(circle, ${gradientColor1}, ${gradientColor2})`,
-              }}
-            />
-
-            {/* Rotation (linear only) */}
-            {gradientType === "linear" && (
+            <ColorPickerPopover color={c1} label="Start" onChange={(v) => { setC1(v); pushGrad(v, c2, gradRot, gradType); }}/>
+            <ColorPickerPopover color={c2} label="End" onChange={(v) => { setC2(v); pushGrad(c1, v, gradRot, gradType); }}/>
+            <div className="h-5 rounded-lg border border-gray-200" style={{
+              background: gradType === "linear"
+                ? `linear-gradient(${gradRot}deg, ${c1}, ${c2})`
+                : `radial-gradient(circle, ${c1}, ${c2})`,
+            }}/>
+            {gradType === "linear" && (
               <div className="flex items-center gap-3">
-                <span className="text-gray-600 text-sm flex-shrink-0">
-                  Angle
-                </span>
-                <input
-                  type="range"
-                  min={0}
-                  max={360}
-                  value={gradientRotation}
-                  onChange={(e) => handleGradientRotation(Number(e.target.value))}
-                  className="flex-1 accent-primary"
-                />
-                <span className="text-gray-500 text-xs w-8 text-right tabular-nums">
-                  {gradientRotation}°
-                </span>
+                <span className="text-gray-500 text-sm flex-shrink-0">Angle</span>
+                <input type="range" min={0} max={360} value={gradRot}
+                  onChange={(e) => { setGradRot(+e.target.value); pushGrad(c1, c2, +e.target.value, gradType); }}
+                  className="flex-1 accent-primary"/>
+                <span className="text-gray-400 text-xs w-8 text-right tabular-nums">{gradRot}°</span>
               </div>
             )}
           </div>
@@ -251,25 +138,13 @@ export default function ColorSection() {
       {/* Corner colors */}
       <div className="bg-gray-50 rounded-xl p-4 flex flex-col gap-3">
         <span className="text-gray-700 text-sm font-medium">Corner Colors</span>
-        <ColorPickerPopover
-          color={cornersSquareOptions.color}
-          onChange={setCornerSquareColor}
-          label="Frame color"
-        />
-        <ColorPickerPopover
-          color={cornersDotOptions.color}
-          onChange={setCornerDotColor}
-          label="Dot color"
-        />
+        <ColorPickerPopover color={cornersSquareOptions.color} onChange={setCornerSquareColor} label="Frame"/>
+        <ColorPickerPopover color={cornersDotOptions.color} onChange={setCornerDotColor} label="Dot"/>
       </div>
 
-      {/* Background color */}
+      {/* Background */}
       <div className="bg-gray-50 rounded-xl p-4">
-        <ColorPickerPopover
-          color={backgroundOptions.color}
-          onChange={setBackgroundColor}
-          label="Background"
-        />
+        <ColorPickerPopover color={backgroundOptions.color} onChange={setBackgroundColor} label="Background"/>
       </div>
     </div>
   );
