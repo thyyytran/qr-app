@@ -6,37 +6,54 @@ import { useQRStore } from "@/store/qrStore";
 
 export default function LogoUploader() {
   const { image, imageOptions, setLogo, removeLogo, setLogoSize } = useQRStore();
-  // Keep an object URL of the original file for a crisp preview
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isRemoving, setIsRemoving] = useState(false);
+  const [removeError, setRemoveError] = useState<string | null>(null);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length === 0) return;
       const file = acceptedFiles[0];
-
-      // Object URL → sharp preview at any size
       if (previewUrl) URL.revokeObjectURL(previewUrl);
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-
-      // Read as data URL so it can be stored in state / shared
+      setPreviewUrl(URL.createObjectURL(file));
+      setRemoveError(null);
       const reader = new FileReader();
-      reader.onload = (e) => {
-        const dataURL = e.target?.result as string;
-        setLogo(dataURL);
-      };
+      reader.onload = (e) => setLogo(e.target?.result as string);
       reader.readAsDataURL(file);
     },
     [previewUrl, setLogo]
   );
 
-  const handleRemove = useCallback(() => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl);
-      setPreviewUrl(null);
-    }
+  const handleRemoveLogo = useCallback(() => {
+    if (previewUrl) { URL.revokeObjectURL(previewUrl); setPreviewUrl(null); }
+    setRemoveError(null);
     removeLogo();
   }, [previewUrl, removeLogo]);
+
+  const handleRemoveBackground = useCallback(async () => {
+    if (!image) return;
+    setIsRemoving(true);
+    setRemoveError(null);
+    try {
+      const { removeBackground } = await import("@imgly/background-removal");
+      // Pass the stored data URL directly — library accepts string URLs
+      const resultBlob = await removeBackground(image);
+      // Convert blob → data URL so it can be stored and shared
+      const dataURL = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.readAsDataURL(resultBlob);
+      });
+      // Revoke old object URL and switch preview to the new processed image
+      if (previewUrl) { URL.revokeObjectURL(previewUrl); setPreviewUrl(null); }
+      setLogo(dataURL);
+    } catch (err) {
+      console.error("Background removal error:", err);
+      setRemoveError("Could not remove background. Try a different image.");
+    } finally {
+      setIsRemoving(false);
+    }
+  }, [image, previewUrl, setLogo]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -46,7 +63,6 @@ export default function LogoUploader() {
   });
 
   const logoSizePct = Math.round(imageOptions.imageSize * 100);
-  // Prefer the original object URL; fall back to the stored data URL
   const displaySrc = previewUrl ?? image;
 
   return (
@@ -77,25 +93,63 @@ export default function LogoUploader() {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-4">
-            {/* Preview at 80×80 using the original file object URL */}
-            <div className="relative w-20 h-20 flex-shrink-0 bg-white rounded-xl border border-gray-200 p-2 flex items-center justify-center">
+          {/* Preview + info */}
+          <div className="flex items-start gap-4">
+            {/* Checkerboard bg shows transparency */}
+            <div
+              className="relative w-20 h-20 flex-shrink-0 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden"
+              style={{ backgroundImage: "linear-gradient(45deg,#e5e7eb 25%,transparent 25%,transparent 75%,#e5e7eb 75%),linear-gradient(45deg,#e5e7eb 25%,transparent 25%,transparent 75%,#e5e7eb 75%)", backgroundSize: "12px 12px", backgroundPosition: "0 0,6px 6px", backgroundColor: "#fff" }}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={displaySrc ?? ""}
-                alt="Logo preview"
-                className="max-w-full max-h-full object-contain"
-              />
+              <img src={displaySrc ?? ""} alt="Logo preview" className="max-w-full max-h-full object-contain p-1.5" />
+              {isRemoving && (
+                <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                </div>
+              )}
             </div>
-            <div className="flex-1">
+
+            <div className="flex-1 min-w-0">
               <p className="text-gray-800 text-sm font-medium mb-0.5">Logo overlay active</p>
-              <p className="text-gray-400 text-xs">Error correction set to H for best coverage</p>
-              <button onClick={handleRemove} className="mt-2 text-xs text-red-500 hover:text-red-600">
+              <p className="text-gray-400 text-xs mb-3">Error correction set to H for best coverage</p>
+
+              {/* Remove background button */}
+              <button
+                onClick={handleRemoveBackground}
+                disabled={isRemoving}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-primary/30 bg-primary/5 text-primary text-xs font-semibold hover:bg-primary/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isRemoving ? (
+                  <>
+                    <div className="w-3 h-3 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                    Removing background…
+                  </>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42"/>
+                    </svg>
+                    Remove Background
+                  </>
+                )}
+              </button>
+
+              {removeError && (
+                <p className="text-red-500 text-xs mt-2">{removeError}</p>
+              )}
+              {isRemoving && (
+                <p className="text-gray-400 text-xs mt-1.5 text-center">
+                  First run downloads a ~40MB AI model — takes a moment
+                </p>
+              )}
+
+              <button onClick={handleRemoveLogo} className="mt-2 text-xs text-red-400 hover:text-red-600 transition-colors block">
                 Remove logo
               </button>
             </div>
           </div>
 
+          {/* Size slider */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <span className="section-label">Logo Size</span>
@@ -112,6 +166,7 @@ export default function LogoUploader() {
             </div>
           </div>
 
+          {/* Replace logo dropzone */}
           <div
             {...getRootProps()}
             className="border border-dashed border-gray-200 rounded-xl p-3 text-center cursor-pointer hover:border-primary/40 bg-gray-50 transition-all"
