@@ -51,7 +51,7 @@ const DEFAULT_STATE: AppState = {
   },
   imageOptions: {
     hideBackgroundDots: true,
-    imageSize: 0.2,
+    imageSize: 0.25,
     margin: 8,
     crossOrigin: "anonymous",
   },
