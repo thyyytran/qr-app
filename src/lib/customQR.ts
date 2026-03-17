@@ -60,9 +60,12 @@ export function getDotPath(type: CustomDotType): string {
 // ---------------------------------------------------------------------------
 
 function inFinderZone(r: number, c: number, size: number): boolean {
-  if (r < 9 && c < 9) return true;           // top-left (include separator)
-  if (r < 9 && c >= size - 8) return true;   // top-right
-  if (r >= size - 8 && c < 9) return true;   // bottom-left
+  // Exclude only the 7×7 finder pattern blocks — NOT the separator or format
+  // info strips at row/col 8, which must remain as custom dots so scanners
+  // can decode the format information.
+  if (r < 7 && c < 7) return true;           // top-left
+  if (r < 7 && c >= size - 7) return true;   // top-right
+  if (r >= size - 7 && c < 7) return true;   // bottom-left
   return false;
 }
 
@@ -133,8 +136,10 @@ export function buildCustomQRSVG(
 
   const fill = useGrad ? "url(#dg)" : dotsColor;
   const shape = getDotPath(dotType);
-  // Scale: each dot occupies `cell` px; we scale the unit path (±0.5ish) by cell*0.44
-  const scale = (cell * 0.44).toFixed(3);
+  // The unit path spans roughly ±0.5 (width = 1.0 unit).
+  // We need each dot to fill ~90% of the cell so scanners can reliably
+  // detect dark vs light modules: scale = cell / 1.0 * 0.9 = cell * 0.9
+  const scale = (cell * 0.9).toFixed(3);
 
   // Data modules
   for (let r = 0; r < moduleSize; r++) {
