@@ -191,14 +191,12 @@ export function buildCustomQRSVG(
     parts.push(`<defs>${defs.join("")}</defs>`);
   }
 
-  // Inner content (data modules + finder eyes + logo) — clipped in frame mode
-  const inner: string[] = [];
-
   const fill = useGrad ? "url(#dg)" : dotsColor;
   const shape = getDotPath(dotType);
   const scale = (cell * 0.9).toFixed(3);
 
-  // Data modules
+  // Data modules (always clipped in frame mode)
+  const dataParts: string[] = [];
   for (let r = 0; r < moduleSize; r++) {
     for (let c = 0; c < moduleSize; c++) {
       if (!isDark(r, c)) continue;
@@ -208,7 +206,7 @@ export function buildCustomQRSVG(
       const cx = cxNum.toFixed(2);
       const cy = cyNum.toFixed(2);
       if (shape) {
-        inner.push(
+        dataParts.push(
           `<path d="${shape}" transform="translate(${cx},${cy}) scale(${scale})" fill="${fill}"/>`
         );
       } else {
@@ -217,19 +215,19 @@ export function buildCustomQRSVG(
         const y = f(cyNum - rad);
         const w = f(rad * 2);
         if (dotType === "dots") {
-          inner.push(`<circle cx="${cx}" cy="${cy}" r="${f(rad)}" fill="${fill}"/>`);
+          dataParts.push(`<circle cx="${cx}" cy="${cy}" r="${f(rad)}" fill="${fill}"/>`);
         } else if (dotType === "rounded") {
-          inner.push(`<rect x="${x}" y="${y}" width="${w}" height="${w}" rx="${f(rad * 0.4)}" fill="${fill}"/>`);
+          dataParts.push(`<rect x="${x}" y="${y}" width="${w}" height="${w}" rx="${f(rad * 0.4)}" fill="${fill}"/>`);
         } else if (dotType === "extra-rounded") {
-          inner.push(`<rect x="${x}" y="${y}" width="${w}" height="${w}" rx="${f(rad * 0.65)}" fill="${fill}"/>`);
+          dataParts.push(`<rect x="${x}" y="${y}" width="${w}" height="${w}" rx="${f(rad * 0.65)}" fill="${fill}"/>`);
         } else {
-          inner.push(`<rect x="${x}" y="${y}" width="${w}" height="${w}" fill="${fill}"/>`);
+          dataParts.push(`<rect x="${x}" y="${y}" width="${w}" height="${w}" fill="${fill}"/>`);
         }
       }
     }
   }
 
-  // Finder patterns — in frame mode use extra-rounded eyes; otherwise respect cornerSquareType
+  // Finder patterns — in frame mode use extra-rounded; otherwise respect cornerSquareType
   const eyes = [
     { r: 0, c: 0 },
     { r: 0, c: moduleSize - 7 },
@@ -237,6 +235,7 @@ export function buildCustomQRSVG(
   ];
 
   const eyeType: CornerSquareType = isFrameMode ? "extra-rounded" : cornerSquareType;
+  const eyeParts: string[] = [];
 
   for (const { r: er, c: ec } of eyes) {
     const ex = margin + ec * cell;
@@ -246,6 +245,7 @@ export function buildCustomQRSVG(
     const innerSq = 3 * cell;
     const off1 = cell;
     const off2 = 2 * cell;
+    const pad = cell * 0.5;
 
     const outerRx =
       eyeType === "dot" ? outer / 2 :
@@ -253,7 +253,13 @@ export function buildCustomQRSVG(
     const whiteRx = outerRx > 0 ? white * 0.18 : 0;
     const innerRx = outerRx > 0 ? innerSq * 0.2 : 0;
 
-    inner.push(
+    if (isFrameMode) {
+      // White backing clears any overlap with the frame border so eyes are crisp
+      eyeParts.push(
+        `<rect x="${f(ex - pad)}" y="${f(ey - pad)}" width="${f(outer + pad * 2)}" height="${f(outer + pad * 2)}" rx="${f(outerRx + pad * 0.5)}" fill="${backgroundColor}"/>`
+      );
+    }
+    eyeParts.push(
       `<rect x="${f(ex)}" y="${f(ey)}" width="${f(outer)}" height="${f(outer)}" rx="${f(outerRx)}" fill="${cornerSquareColor}"/>`,
       `<rect x="${f(ex + off1)}" y="${f(ey + off1)}" width="${f(white)}" height="${f(white)}" rx="${f(whiteRx)}" fill="${backgroundColor}"/>`,
       `<rect x="${f(ex + off2)}" y="${f(ey + off2)}" width="${f(innerSq)}" height="${f(innerSq)}" rx="${f(innerRx)}" fill="${cornerDotColor}"/>`
@@ -261,27 +267,34 @@ export function buildCustomQRSVG(
   }
 
   // Logo
+  const logoParts: string[] = [];
   if (options.image && options.imageSize) {
     const ls = size * options.imageSize;
     const lx = (size - ls) / 2;
     const ly = (size - ls) / 2;
     const pad = ls * 0.12;
-    inner.push(
+    logoParts.push(
       `<rect x="${f(lx - pad)}" y="${f(ly - pad)}" width="${f(ls + pad * 2)}" height="${f(ls + pad * 2)}" rx="${f(pad)}" fill="${backgroundColor}"/>`,
       `<image href="${options.image}" x="${f(lx)}" y="${f(ly)}" width="${f(ls)}" height="${f(ls)}" preserveAspectRatio="xMidYMid meet"/>`
     );
   }
 
   if (isFrameMode) {
-    // Clip all inner content to the frame shape
-    parts.push(`<g clip-path="url(#fr)">${inner.join("")}</g>`);
-    // Draw the frame border on top
+    // 1. Clip data modules to frame shape
+    parts.push(`<g clip-path="url(#fr)">${dataParts.join("")}</g>`);
+    // 2. Frame border stroke
     const strokeW = f(size * 0.045);
     parts.push(
       `<path d="${framePath}" fill="none" stroke="${cornerSquareColor}" stroke-width="${strokeW}" stroke-linejoin="round"/>`
     );
+    // 3. Finder eyes drawn AFTER clip+border — always visible, never clipped
+    parts.push(...eyeParts);
+    // 4. Logo on top
+    parts.push(...logoParts);
   } else {
-    parts.push(...inner);
+    parts.push(...dataParts);
+    parts.push(...eyeParts);
+    parts.push(...logoParts);
   }
 
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">${parts.join("")}</svg>`;
