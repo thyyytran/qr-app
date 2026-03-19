@@ -21,10 +21,10 @@ export default function DownloadSection() {
       store.data || "https://qrcraft.app",
       store.errorCorrectionLevel
     );
-    const svgStr = buildCustomQRSVG(matrix.data, matrix.size, {
+    const opts = {
       size: selectedSize,
       margin: Math.round(store.margin * (selectedSize / (store.width || 400))),
-      dotType: store.dotsOptions.type as import("@/types/qr").CustomDotType,
+      dotType: store.dotsOptions.type,
       dotsColor: store.dotsOptions.color,
       gradient: store.useGradient ? store.dotsOptions.gradient : undefined,
       backgroundColor: store.backgroundOptions.color,
@@ -33,41 +33,69 @@ export default function DownloadSection() {
       cornerSquareType: store.cornersSquareOptions.type,
       image: store.image,
       imageSize: store.imageOptions.imageSize,
-    });
+    };
 
     if (extension === "svg") {
+      const svgStr = buildCustomQRSVG(matrix.data, matrix.size, opts);
       const blob = new Blob([svgStr], { type: "image/svg+xml" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url; a.download = "qrcraft.svg"; a.click();
       URL.revokeObjectURL(url);
     } else {
-      // SVG → Canvas → PNG
-      const img = new Image();
-      const blob = new Blob([svgStr], { type: "image/svg+xml" });
-      const url = URL.createObjectURL(blob);
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = selectedSize; canvas.height = selectedSize;
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(img, 0, 0);
-        URL.revokeObjectURL(url);
-        canvas.toBlob((b) => {
-          if (!b) return;
-          const pngUrl = URL.createObjectURL(b);
-          const a = document.createElement("a");
-          a.href = pngUrl; a.download = "qrcraft.png"; a.click();
-          URL.revokeObjectURL(pngUrl);
-        }, "image/png");
-      };
-      img.src = url;
+      // Render SVG without logo to canvas (browsers block <image> in SVG blobs),
+      // then overlay the logo directly on the canvas.
+      const svgNoLogo = buildCustomQRSVG(matrix.data, matrix.size, { ...opts, image: undefined, imageSize: undefined });
+      const canvas = document.createElement("canvas");
+      canvas.width = selectedSize; canvas.height = selectedSize;
+      const ctx = canvas.getContext("2d")!;
+
+      await new Promise<void>((resolve) => {
+        const img = new Image();
+        const blob = new Blob([svgNoLogo], { type: "image/svg+xml" });
+        const url = URL.createObjectURL(blob);
+        img.onload = () => { ctx.drawImage(img, 0, 0, selectedSize, selectedSize); URL.revokeObjectURL(url); resolve(); };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(); };
+        img.src = url;
+      });
+
+      if (store.image && store.imageOptions.imageSize) {
+        await new Promise<void>((resolve) => {
+          const logoImg = new Image();
+          logoImg.onload = () => {
+            const ls = selectedSize * store.imageOptions.imageSize;
+            const lx = (selectedSize - ls) / 2;
+            const ly = (selectedSize - ls) / 2;
+            const pad = ls * 0.12;
+            ctx.fillStyle = store.backgroundOptions.color;
+            ctx.beginPath();
+            ctx.rect(lx - pad, ly - pad, ls + pad * 2, ls + pad * 2);
+            ctx.fill();
+            ctx.drawImage(logoImg, lx, ly, ls, ls);
+            resolve();
+          };
+          logoImg.onerror = () => resolve();
+          logoImg.src = store.image!;
+        });
+      }
+
+      canvas.toBlob((b) => {
+        if (!b) return;
+        const pngUrl = URL.createObjectURL(b);
+        const a = document.createElement("a");
+        a.href = pngUrl; a.download = "qrcraft.png"; a.click();
+        URL.revokeObjectURL(pngUrl);
+      }, "image/png");
     }
   };
 
   const download = async (extension: "png" | "svg") => {
     setIsDownloading(extension);
     try {
-      if (isCustomDotType(store.dotsOptions.type)) {
+      const isCustom = isCustomDotType(store.dotsOptions.type) ||
+        store.cornersSquareOptions.type === "heart" ||
+        store.cornersSquareOptions.type === "star";
+      if (isCustom) {
         await downloadCustomSVG(extension);
       } else {
         const { default: QRCodeStyling } = await import("qr-code-styling");

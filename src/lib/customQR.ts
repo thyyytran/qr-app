@@ -1,5 +1,4 @@
-import type { CornerSquareType, GradientConfig } from "@/types/qr";
-import type { CustomDotType } from "@/types/qr";
+import type { CornerSquareType, GradientConfig, DotType } from "@/types/qr";
 
 // ---------------------------------------------------------------------------
 // Dot shape paths — normalized so center is (0,0), fits within radius ~0.75
@@ -46,12 +45,13 @@ function leafPath(): string {
   ].join(" ");
 }
 
-export function getDotPath(type: CustomDotType): string {
+export function getDotPath(type: DotType): string | null {
   switch (type) {
     case "heart": return heartPath();
     case "star": return starPath();
     case "diamond": return diamondPath();
     case "leaf": return leafPath();
+    default: return null;
   }
 }
 
@@ -77,7 +77,7 @@ export interface CustomQROptions {
   /** Output canvas size in px */
   size: number;
   margin: number;
-  dotType: CustomDotType;
+  dotType: DotType;
   dotsColor: string;
   gradient?: GradientConfig;
   backgroundColor: string;
@@ -136,9 +136,6 @@ export function buildCustomQRSVG(
 
   const fill = useGrad ? "url(#dg)" : dotsColor;
   const shape = getDotPath(dotType);
-  // The unit path spans roughly ±0.5 (width = 1.0 unit).
-  // We need each dot to fill ~90% of the cell so scanners can reliably
-  // detect dark vs light modules: scale = cell / 1.0 * 0.9 = cell * 0.9
   const scale = (cell * 0.9).toFixed(3);
 
   // Data modules
@@ -146,11 +143,30 @@ export function buildCustomQRSVG(
     for (let c = 0; c < moduleSize; c++) {
       if (!isDark(r, c)) continue;
       if (inFinderZone(r, c, moduleSize)) continue;
-      const cx = (margin + (c + 0.5) * cell).toFixed(2);
-      const cy = (margin + (r + 0.5) * cell).toFixed(2);
-      parts.push(
-        `<path d="${shape}" transform="translate(${cx},${cy}) scale(${scale})" fill="${fill}"/>`
-      );
+      const cxNum = margin + (c + 0.5) * cell;
+      const cyNum = margin + (r + 0.5) * cell;
+      const cx = cxNum.toFixed(2);
+      const cy = cyNum.toFixed(2);
+      if (shape) {
+        parts.push(
+          `<path d="${shape}" transform="translate(${cx},${cy}) scale(${scale})" fill="${fill}"/>`
+        );
+      } else {
+        // Standard dot types rendered as SVG primitives
+        const rad = cell * 0.45;
+        const x = f(cxNum - rad);
+        const y = f(cyNum - rad);
+        const w = f(rad * 2);
+        if (dotType === "dots") {
+          parts.push(`<circle cx="${cx}" cy="${cy}" r="${f(rad)}" fill="${fill}"/>`);
+        } else if (dotType === "rounded") {
+          parts.push(`<rect x="${x}" y="${y}" width="${w}" height="${w}" rx="${f(rad * 0.4)}" fill="${fill}"/>`);
+        } else if (dotType === "extra-rounded") {
+          parts.push(`<rect x="${x}" y="${y}" width="${w}" height="${w}" rx="${f(rad * 0.65)}" fill="${fill}"/>`);
+        } else {
+          parts.push(`<rect x="${x}" y="${y}" width="${w}" height="${w}" fill="${fill}"/>`);
+        }
+      }
     }
   }
 
@@ -169,21 +185,38 @@ export function buildCustomQRSVG(
     const inner = 3 * cell;
     const off1 = cell;
     const off2 = 2 * cell;
+    const cx = ex + outer / 2;
+    const cy = ey + outer / 2;
 
-    const outerRx =
-      cornerSquareType === "dot"
-        ? outer / 2
-        : cornerSquareType === "extra-rounded"
-        ? outer * 0.18
-        : 0;
-    const whiteRx = outerRx > 0 ? white * 0.18 : 0;
-    const innerRx = outerRx > 0 ? inner * 0.2 : 0;
-
-    parts.push(
-      `<rect x="${f(ex)}" y="${f(ey)}" width="${f(outer)}" height="${f(outer)}" rx="${f(outerRx)}" fill="${cornerSquareColor}"/>`,
-      `<rect x="${f(ex + off1)}" y="${f(ey + off1)}" width="${f(white)}" height="${f(white)}" rx="${f(whiteRx)}" fill="${backgroundColor}"/>`,
-      `<rect x="${f(ex + off2)}" y="${f(ey + off2)}" width="${f(inner)}" height="${f(inner)}" rx="${f(innerRx)}" fill="${cornerDotColor}"/>`
-    );
+    if (cornerSquareType === "heart") {
+      const hs = f(outer * 0.88);
+      parts.push(
+        `<path d="${heartPath()}" transform="translate(${f(cx)},${f(cy)}) scale(${hs})" fill="${cornerSquareColor}"/>`,
+        `<rect x="${f(ex + off1)}" y="${f(ey + off1)}" width="${f(white)}" height="${f(white)}" rx="${f(white * 0.15)}" fill="${backgroundColor}"/>`,
+        `<rect x="${f(ex + off2)}" y="${f(ey + off2)}" width="${f(inner)}" height="${f(inner)}" rx="${f(inner * 0.2)}" fill="${cornerDotColor}"/>`
+      );
+    } else if (cornerSquareType === "star") {
+      const ss = f(outer * 0.68);
+      parts.push(
+        `<path d="${starPath()}" transform="translate(${f(cx)},${f(cy)}) scale(${ss})" fill="${cornerSquareColor}"/>`,
+        `<rect x="${f(ex + off1)}" y="${f(ey + off1)}" width="${f(white)}" height="${f(white)}" rx="${f(white * 0.15)}" fill="${backgroundColor}"/>`,
+        `<rect x="${f(ex + off2)}" y="${f(ey + off2)}" width="${f(inner)}" height="${f(inner)}" rx="${f(inner * 0.2)}" fill="${cornerDotColor}"/>`
+      );
+    } else {
+      const outerRx =
+        cornerSquareType === "dot"
+          ? outer / 2
+          : cornerSquareType === "extra-rounded"
+          ? outer * 0.18
+          : 0;
+      const whiteRx = outerRx > 0 ? white * 0.18 : 0;
+      const innerRx = outerRx > 0 ? inner * 0.2 : 0;
+      parts.push(
+        `<rect x="${f(ex)}" y="${f(ey)}" width="${f(outer)}" height="${f(outer)}" rx="${f(outerRx)}" fill="${cornerSquareColor}"/>`,
+        `<rect x="${f(ex + off1)}" y="${f(ey + off1)}" width="${f(white)}" height="${f(white)}" rx="${f(whiteRx)}" fill="${backgroundColor}"/>`,
+        `<rect x="${f(ex + off2)}" y="${f(ey + off2)}" width="${f(inner)}" height="${f(inner)}" rx="${f(innerRx)}" fill="${cornerDotColor}"/>`
+      );
+    }
   }
 
   // Logo

@@ -16,7 +16,7 @@ export function isCustomDotType(type: DotType): type is CustomDotType {
   return CUSTOM_DOT_TYPES.includes(type as CustomDotType);
 }
 
-export type CornerSquareType = "dot" | "square" | "extra-rounded";
+export type CornerSquareType = "dot" | "square" | "extra-rounded" | "heart" | "star";
 export type CornerDotType = "dot" | "square";
 export type GradientType = "linear" | "radial";
 

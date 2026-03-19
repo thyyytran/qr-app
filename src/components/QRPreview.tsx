@@ -14,7 +14,9 @@ export default function QRPreview() {
   const [customSVG, setCustomSVG] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const isCustom = isCustomDotType(store.dotsOptions.type);
+  const isCustom = isCustomDotType(store.dotsOptions.type) ||
+    store.cornersSquareOptions.type === "heart" ||
+    store.cornersSquareOptions.type === "star";
 
   // --- Custom shape renderer ---
   const renderCustom = useCallback(async () => {
@@ -32,7 +34,7 @@ export default function QRPreview() {
       const svg = buildCustomQRSVG(matrix.data, matrix.size, {
         size: store.width,
         margin: store.margin,
-        dotType: store.dotsOptions.type as import("@/types/qr").CustomDotType,
+        dotType: store.dotsOptions.type,
         dotsColor: store.dotsOptions.color,
         gradient: store.useGradient ? store.dotsOptions.gradient : undefined,
         backgroundColor: store.backgroundOptions.color,

@@ -16,7 +16,9 @@ export default function SharedQRView({ config }: SharedQRViewProps) {
   const [customSVG, setCustomSVG] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState<"png" | "svg" | null>(null);
 
-  const isCustom = isCustomDotType(config.dotsOptions.type);
+  const isCustom = isCustomDotType(config.dotsOptions.type) ||
+    config.cornersSquareOptions.type === "heart" ||
+    config.cornersSquareOptions.type === "star";
 
   useEffect(() => {
     let cancelled = false;
@@ -28,7 +30,7 @@ export default function SharedQRView({ config }: SharedQRViewProps) {
           const svg = buildCustomQRSVG(matrix.data, matrix.size, {
             size: 400,
             margin: config.margin,
-            dotType: config.dotsOptions.type as import("@/types/qr").CustomDotType,
+            dotType: config.dotsOptions.type,
             dotsColor: config.dotsOptions.color,
             gradient: config.dotsOptions.gradient,
             backgroundColor: config.backgroundOptions.color,
@@ -74,9 +76,10 @@ export default function SharedQRView({ config }: SharedQRViewProps) {
       if (isCustom) {
         const { getQRMatrix, buildCustomQRSVG } = await import("@/lib/customQR");
         const matrix = await getQRMatrix(config.data, config.errorCorrectionLevel);
-        const svgStr = buildCustomQRSVG(matrix.data, matrix.size, {
-          size: 1200, margin: config.margin * 3,
-          dotType: config.dotsOptions.type as import("@/types/qr").CustomDotType,
+        const DL_SIZE = 1200;
+        const opts = {
+          size: DL_SIZE, margin: config.margin * 3,
+          dotType: config.dotsOptions.type,
           dotsColor: config.dotsOptions.color,
           gradient: config.dotsOptions.gradient,
           backgroundColor: config.backgroundOptions.color,
@@ -85,31 +88,53 @@ export default function SharedQRView({ config }: SharedQRViewProps) {
           cornerSquareType: config.cornersSquareOptions.type,
           image: config.image,
           imageSize: config.imageOptions.imageSize,
-        });
+        };
         if (extension === "svg") {
+          const svgStr = buildCustomQRSVG(matrix.data, matrix.size, opts);
           const blob = new Blob([svgStr], { type: "image/svg+xml" });
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url; a.download = "qrcraft-shared.svg"; a.click();
           URL.revokeObjectURL(url);
         } else {
-          const img = new Image();
-          const blob = new Blob([svgStr], { type: "image/svg+xml" });
-          const blobUrl = URL.createObjectURL(blob);
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = 1200; canvas.height = 1200;
-            canvas.getContext("2d")!.drawImage(img, 0, 0);
-            URL.revokeObjectURL(blobUrl);
-            canvas.toBlob((b) => {
-              if (!b) return;
-              const u = URL.createObjectURL(b);
-              const a = document.createElement("a");
-              a.href = u; a.download = "qrcraft-shared.png"; a.click();
-              URL.revokeObjectURL(u);
-            }, "image/png");
-          };
-          img.src = blobUrl;
+          const svgNoLogo = buildCustomQRSVG(matrix.data, matrix.size, { ...opts, image: undefined, imageSize: undefined });
+          const canvas = document.createElement("canvas");
+          canvas.width = DL_SIZE; canvas.height = DL_SIZE;
+          const ctx = canvas.getContext("2d")!;
+          await new Promise<void>((resolve) => {
+            const img = new Image();
+            const blob = new Blob([svgNoLogo], { type: "image/svg+xml" });
+            const url = URL.createObjectURL(blob);
+            img.onload = () => { ctx.drawImage(img, 0, 0, DL_SIZE, DL_SIZE); URL.revokeObjectURL(url); resolve(); };
+            img.onerror = () => { URL.revokeObjectURL(url); resolve(); };
+            img.src = url;
+          });
+          if (config.image && config.imageOptions.imageSize) {
+            await new Promise<void>((resolve) => {
+              const logoImg = new Image();
+              logoImg.onload = () => {
+                const ls = DL_SIZE * config.imageOptions.imageSize;
+                const lx = (DL_SIZE - ls) / 2;
+                const ly = (DL_SIZE - ls) / 2;
+                const pad = ls * 0.12;
+                ctx.fillStyle = config.backgroundOptions.color;
+                ctx.beginPath();
+                ctx.rect(lx - pad, ly - pad, ls + pad * 2, ls + pad * 2);
+                ctx.fill();
+                ctx.drawImage(logoImg, lx, ly, ls, ls);
+                resolve();
+              };
+              logoImg.onerror = () => resolve();
+              logoImg.src = config.image!;
+            });
+          }
+          canvas.toBlob((b) => {
+            if (!b) return;
+            const u = URL.createObjectURL(b);
+            const a = document.createElement("a");
+            a.href = u; a.download = "qrcraft-shared.png"; a.click();
+            URL.revokeObjectURL(u);
+          }, "image/png");
         }
       } else {
         const { default: QRCodeStyling } = await import("qr-code-styling");

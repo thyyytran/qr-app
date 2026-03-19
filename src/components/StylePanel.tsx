@@ -106,6 +106,39 @@ const CORNER_SQUARE_STYLES: CornerSquareOption[] = [
       </svg>
     ),
   },
+  {
+    type: "heart",
+    label: "Heart",
+    preview: (
+      <svg viewBox="-1 -1 2 2" className="w-6 h-6">
+        <path d="M 0 0.35 C -0.05 0.2 -0.5 0.08 -0.5 -0.15 C -0.5 -0.44 -0.22 -0.52 0 -0.24 C 0.22 -0.52 0.5 -0.44 0.5 -0.15 C 0.5 0.08 0.05 0.2 0 0.35 Z" fill="none" stroke="currentColor" strokeWidth="0.12"/>
+        <path d="M 0 0.1 C -0.02 0.05 -0.22 -0.02 -0.22 -0.12 C -0.22 -0.24 -0.1 -0.27 0 -0.14 C 0.1 -0.27 0.22 -0.24 0.22 -0.12 C 0.22 -0.02 0.02 0.05 0 0.1 Z" fill="currentColor"/>
+      </svg>
+    ),
+  },
+  {
+    type: "star",
+    label: "Star",
+    preview: (() => {
+      const pts = 5; const outer = 0.72; const inner = 0.3;
+      const d = Array.from({ length: pts * 2 }, (_, i) => {
+        const a = (i * Math.PI) / pts - Math.PI / 2;
+        const r = i % 2 === 0 ? outer : inner;
+        return (i === 0 ? "M" : "L") + (Math.cos(a) * r).toFixed(3) + "," + (Math.sin(a) * r).toFixed(3);
+      }).join(" ") + "Z";
+      const ds = Array.from({ length: pts * 2 }, (_, i) => {
+        const a = (i * Math.PI) / pts - Math.PI / 2;
+        const r = i % 2 === 0 ? outer * 0.44 : inner * 0.44;
+        return (i === 0 ? "M" : "L") + (Math.cos(a) * r).toFixed(3) + "," + (Math.sin(a) * r).toFixed(3);
+      }).join(" ") + "Z";
+      return (
+        <svg viewBox="-1 -1 2 2" className="w-6 h-6">
+          <path d={d} fill="none" stroke="currentColor" strokeWidth="0.12"/>
+          <path d={ds} fill="currentColor"/>
+        </svg>
+      );
+    })(),
+  },
 ];
 
 const CORNER_DOT_STYLES: CornerDotOption[] = [
@@ -163,13 +196,13 @@ export default function StylePanel() {
       {/* Corner Frame */}
       <div>
         <p className="section-label mb-3">Corner Frame</p>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-5 gap-2">
           {CORNER_SQUARE_STYLES.map(({ type, label, preview }) => (
             <button
               key={type}
               onClick={() => setCornerSquareType(type)}
               title={label}
-              className={`flex flex-col items-center gap-1.5 py-2.5 flex-1 rounded-xl border text-xs font-semibold transition-all hover-lift ${
+              className={`flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-xl border text-xs font-semibold transition-all hover-lift ${
                 cornersSquareOptions.type === type
                   ? "border-primary bg-primary/8 text-primary shadow-glow"
                   : "border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-gray-700"
