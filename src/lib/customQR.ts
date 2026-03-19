@@ -59,8 +59,8 @@ export function getDotPath(type: DotType): string | null {
 
 /**
  * Classic heart outline fitting within the given canvas size/margin.
- * Built from two arcs (the bumps) and two quadratic beziers (the sides).
- * Coordinate system: 80-unit grid from (10,10) to (90,90), scaled to canvas.
+ * Control point at y=75 (not 60) gives a wider lower body so the
+ * bottom-left QR finder stays inside the shape.
  */
 function heartFramePath(size: number, margin: number): string {
   const s = (size - 2 * margin) / 80;
@@ -72,8 +72,8 @@ function heartFramePath(size: number, margin: number): string {
   return (
     `M ${px(50)},${py(30)}` +
     ` A ${r},${r} 0 0 1 ${px(90)},${py(30)}` +
-    ` Q ${px(90)},${py(60)} ${px(50)},${py(90)}` +
-    ` Q ${px(10)},${py(60)} ${px(10)},${py(30)}` +
+    ` Q ${px(90)},${py(75)} ${px(50)},${py(90)}` +
+    ` Q ${px(10)},${py(75)} ${px(10)},${py(30)}` +
     ` A ${r},${r} 0 0 1 ${px(50)},${py(30)} Z`
   );
 }
@@ -137,13 +137,19 @@ export function buildCustomQRSVG(
   const { size, margin, dotType, dotsColor, backgroundColor,
           cornerSquareColor, cornerDotColor, cornerSquareType } = options;
 
-  const cell = (size - margin * 2) / moduleSize;
+  // Heart/star: clip the entire QR to the shape, draw a stroke border
+  const isFrameMode = cornerSquareType === "heart" || cornerSquareType === "star";
+
+  // In frame mode, shrink the QR content so all 3 finder patterns fit inside the shape.
+  // Heart needs ~20% margin on each side; star needs ~25%.
+  const qrMargin = isFrameMode
+    ? Math.round(size * (cornerSquareType === "star" ? 0.25 : 0.20))
+    : margin;
+
+  const cell = (size - qrMargin * 2) / moduleSize;
   const isDark = (r: number, c: number) =>
     r >= 0 && r < moduleSize && c >= 0 && c < moduleSize &&
     moduleData[r * moduleSize + c] !== 0;
-
-  // Heart/star: clip the entire QR to the shape, draw a stroke border
-  const isFrameMode = cornerSquareType === "heart" || cornerSquareType === "star";
 
   const parts: string[] = [];
   const defs: string[] = [];
@@ -178,12 +184,13 @@ export function buildCustomQRSVG(
     }
   }
 
-  // Frame clip path
+  // Frame clip path — use a small fixed margin so the border isn't cut off
+  const frameBorderMargin = Math.round(size * 0.01);
   let framePath = "";
   if (isFrameMode) {
     framePath = cornerSquareType === "heart"
-      ? heartFramePath(size, margin)
-      : starFramePath(size, margin);
+      ? heartFramePath(size, frameBorderMargin)
+      : starFramePath(size, frameBorderMargin);
     defs.push(`<clipPath id="fr"><path d="${framePath}"/></clipPath>`);
   }
 
@@ -201,8 +208,8 @@ export function buildCustomQRSVG(
     for (let c = 0; c < moduleSize; c++) {
       if (!isDark(r, c)) continue;
       if (inFinderZone(r, c, moduleSize)) continue;
-      const cxNum = margin + (c + 0.5) * cell;
-      const cyNum = margin + (r + 0.5) * cell;
+      const cxNum = qrMargin + (c + 0.5) * cell;
+      const cyNum = qrMargin + (r + 0.5) * cell;
       const cx = cxNum.toFixed(2);
       const cy = cyNum.toFixed(2);
       if (shape) {
@@ -238,8 +245,8 @@ export function buildCustomQRSVG(
   const eyeParts: string[] = [];
 
   for (const { r: er, c: ec } of eyes) {
-    const ex = margin + ec * cell;
-    const ey = margin + er * cell;
+    const ex = qrMargin + ec * cell;
+    const ey = qrMargin + er * cell;
     const outer = 7 * cell;
     const white = 5 * cell;
     const innerSq = 3 * cell;
@@ -283,7 +290,7 @@ export function buildCustomQRSVG(
     // 1. Clip data modules to frame shape
     parts.push(`<g clip-path="url(#fr)">${dataParts.join("")}</g>`);
     // 2. Frame border stroke
-    const strokeW = f(size * 0.045);
+    const strokeW = f(size * 0.055);
     parts.push(
       `<path d="${framePath}" fill="none" stroke="${cornerSquareColor}" stroke-width="${strokeW}" stroke-linejoin="round"/>`
     );
