@@ -252,7 +252,6 @@ export function buildCustomQRSVG(
     const innerSq = 3 * cell;
     const off1 = cell;
     const off2 = 2 * cell;
-    const pad = cell * 0.5;
 
     const outerRx =
       eyeType === "dot" ? outer / 2 :
@@ -260,12 +259,6 @@ export function buildCustomQRSVG(
     const whiteRx = outerRx > 0 ? white * 0.18 : 0;
     const innerRx = outerRx > 0 ? innerSq * 0.2 : 0;
 
-    if (isFrameMode) {
-      // White backing clears any overlap with the frame border so eyes are crisp
-      eyeParts.push(
-        `<rect x="${f(ex - pad)}" y="${f(ey - pad)}" width="${f(outer + pad * 2)}" height="${f(outer + pad * 2)}" rx="${f(outerRx + pad * 0.5)}" fill="${backgroundColor}"/>`
-      );
-    }
     eyeParts.push(
       `<rect x="${f(ex)}" y="${f(ey)}" width="${f(outer)}" height="${f(outer)}" rx="${f(outerRx)}" fill="${cornerSquareColor}"/>`,
       `<rect x="${f(ex + off1)}" y="${f(ey + off1)}" width="${f(white)}" height="${f(white)}" rx="${f(whiteRx)}" fill="${backgroundColor}"/>`,
@@ -287,16 +280,13 @@ export function buildCustomQRSVG(
   }
 
   if (isFrameMode) {
-    // 1. Clip data modules to frame shape
-    parts.push(`<g clip-path="url(#fr)">${dataParts.join("")}</g>`);
-    // 2. Frame border stroke
+    // Clip data modules + finder eyes inside the frame shape
+    parts.push(`<g clip-path="url(#fr)">${dataParts.join("")}${eyeParts.join("")}</g>`);
+    // Frame border stroke on top
     const strokeW = f(size * 0.055);
     parts.push(
       `<path d="${framePath}" fill="none" stroke="${cornerSquareColor}" stroke-width="${strokeW}" stroke-linejoin="round"/>`
     );
-    // 3. Finder eyes drawn AFTER clip+border — always visible, never clipped
-    parts.push(...eyeParts);
-    // 4. Logo on top
     parts.push(...logoParts);
   } else {
     parts.push(...dataParts);
