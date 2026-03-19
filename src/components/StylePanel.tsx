@@ -110,9 +110,12 @@ const CORNER_SQUARE_STYLES: CornerSquareOption[] = [
     type: "heart",
     label: "Heart",
     preview: (
-      <svg viewBox="-1 -1 2 2" className="w-6 h-6">
-        <path d="M 0 0.35 C -0.05 0.2 -0.5 0.08 -0.5 -0.15 C -0.5 -0.44 -0.22 -0.52 0 -0.24 C 0.22 -0.52 0.5 -0.44 0.5 -0.15 C 0.5 0.08 0.05 0.2 0 0.35 Z" fill="none" stroke="currentColor" strokeWidth="0.12"/>
-        <path d="M 0 0.1 C -0.02 0.05 -0.22 -0.02 -0.22 -0.12 C -0.22 -0.24 -0.1 -0.27 0 -0.14 C 0.1 -0.27 0.22 -0.24 0.22 -0.12 C 0.22 -0.02 0.02 0.05 0 0.1 Z" fill="currentColor"/>
+      // Shows the whole-QR heart frame shape
+      <svg viewBox="0 0 20 20" className="w-6 h-6">
+        <path
+          d="M10,6 A4,4 0 0 1 18,6 Q18,12 10,18 Q2,12 2,6 A4,4 0 0 1 10,6 Z"
+          fill="none" stroke="currentColor" strokeWidth="2"
+        />
       </svg>
     ),
   },
@@ -120,21 +123,17 @@ const CORNER_SQUARE_STYLES: CornerSquareOption[] = [
     type: "star",
     label: "Star",
     preview: (() => {
-      const pts = 5; const outer = 0.72; const inner = 0.3;
+      const pts = 5; const cx = 10; const cy = 10; const outerR = 8; const innerR = 3.4;
       const d = Array.from({ length: pts * 2 }, (_, i) => {
         const a = (i * Math.PI) / pts - Math.PI / 2;
-        const r = i % 2 === 0 ? outer : inner;
-        return (i === 0 ? "M" : "L") + (Math.cos(a) * r).toFixed(3) + "," + (Math.sin(a) * r).toFixed(3);
-      }).join(" ") + "Z";
-      const ds = Array.from({ length: pts * 2 }, (_, i) => {
-        const a = (i * Math.PI) / pts - Math.PI / 2;
-        const r = i % 2 === 0 ? outer * 0.44 : inner * 0.44;
-        return (i === 0 ? "M" : "L") + (Math.cos(a) * r).toFixed(3) + "," + (Math.sin(a) * r).toFixed(3);
+        const r = i % 2 === 0 ? outerR : innerR;
+        return (i === 0 ? "M" : "L") +
+          (cx + Math.cos(a) * r).toFixed(2) + "," +
+          (cy + Math.sin(a) * r).toFixed(2);
       }).join(" ") + "Z";
       return (
-        <svg viewBox="-1 -1 2 2" className="w-6 h-6">
-          <path d={d} fill="none" stroke="currentColor" strokeWidth="0.12"/>
-          <path d={ds} fill="currentColor"/>
+        <svg viewBox="0 0 20 20" className="w-6 h-6">
+          <path d={d} fill="none" stroke="currentColor" strokeWidth="1.5"/>
         </svg>
       );
     })(),
