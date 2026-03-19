@@ -72,8 +72,8 @@ function heartFramePath(size: number, margin: number): string {
   return (
     `M ${px(50)},${py(30)}` +
     ` A ${r},${r} 0 0 1 ${px(90)},${py(30)}` +
-    ` Q ${px(90)},${py(75)} ${px(50)},${py(90)}` +
-    ` Q ${px(10)},${py(75)} ${px(10)},${py(30)}` +
+    ` Q ${px(90)},${py(82)} ${px(50)},${py(90)}` +
+    ` Q ${px(10)},${py(82)} ${px(10)},${py(30)}` +
     ` A ${r},${r} 0 0 1 ${px(50)},${py(30)} Z`
   );
 }
@@ -143,7 +143,7 @@ export function buildCustomQRSVG(
   // In frame mode, shrink the QR content so all 3 finder patterns fit inside the shape.
   // Heart needs ~20% margin on each side; star needs ~25%.
   const qrMargin = isFrameMode
-    ? Math.round(size * (cornerSquareType === "star" ? 0.25 : 0.20))
+    ? Math.round(size * (cornerSquareType === "star" ? 0.25 : 0.15))
     : margin;
 
   const cell = (size - qrMargin * 2) / moduleSize;
