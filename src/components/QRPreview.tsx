@@ -13,14 +13,17 @@ export default function QRPreview() {
   const [isLoading, setIsLoading] = useState(true);
   const [customSVG, setCustomSVG] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   const isCustom = isCustomDotType(store.dotsOptions.type) ||
     store.cornersSquareOptions.type === "heart" ||
     store.cornersSquareOptions.type === "star";
 
+  const showPlaceholder = !store.data && !hasInteracted;
+
   // --- Custom shape renderer ---
   const renderCustom = useCallback(async () => {
-    if (!store.data && !customSVG) {
+    if (!store.data) {
       setIsLoading(false);
       return;
     }
@@ -72,7 +75,7 @@ export default function QRPreview() {
 
   // Init standard renderer
   useEffect(() => {
-    if (isCustom) {
+    if (isCustom || showPlaceholder) {
       setIsInitialized(false);
       return;
     }
@@ -89,7 +92,7 @@ export default function QRPreview() {
     });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCustom]);
+  }, [isCustom, showPlaceholder]);
 
   // Update standard renderer on config change
   useEffect(() => {
@@ -126,19 +129,54 @@ export default function QRPreview() {
   const scale = PREVIEW / (store.width || 400);
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full">
-      <div
-        className="rounded-2xl overflow-hidden border border-gray-200"
-        style={{ width: PREVIEW, height: PREVIEW, background: store.backgroundOptions.color }}
+    <div
+      className="flex flex-col items-center gap-4 w-full"
+      onClick={() => { if (!hasInteracted) setHasInteracted(true); }}
+    >
+      <div className="relative rounded-2xl overflow-hidden border border-gray-200"
+        style={{ width: PREVIEW, height: PREVIEW, background: showPlaceholder ? "#f9fafb" : store.backgroundOptions.color }}
       >
-        {isLoading && (
+        {/* Placeholder state — no data yet, no interaction */}
+        {showPlaceholder && (
+          <>
+            {/* Subtle QR outline silhouette */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-10">
+              <svg viewBox="0 0 21 21" fill="#6b7280" width="160" height="160">
+                <path fillRule="evenodd" d="M0 0h7v7H0zM1 1h5v5H1z"/>
+                <rect x="2" y="2" width="3" height="3"/>
+                <path fillRule="evenodd" d="M14 0h7v7H14zM15 1h5v5H15z"/>
+                <rect x="16" y="2" width="3" height="3"/>
+                <path fillRule="evenodd" d="M0 14h7v7H0zM1 15h5v5H1z"/>
+                <rect x="2" y="16" width="3" height="3"/>
+                <rect x="8" y="6" width="1" height="1"/><rect x="10" y="6" width="1" height="1"/><rect x="12" y="6" width="1" height="1"/>
+                <rect x="6" y="8" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/><rect x="6" y="12" width="1" height="1"/>
+                <rect x="8" y="8" width="2" height="1"/><rect x="11" y="8" width="2" height="1"/>
+                <rect x="8" y="10" width="1" height="2"/><rect x="10" y="10" width="3" height="1"/>
+                <rect x="14" y="9" width="2" height="1"/><rect x="14" y="10" width="2" height="2"/>
+                <rect x="9" y="12" width="2" height="2"/><rect x="13" y="12" width="1" height="2"/>
+                <rect x="16" y="12" width="2" height="2"/><rect x="8" y="15" width="2" height="2"/>
+                <rect x="11" y="14" width="1" height="3"/><rect x="13" y="15" width="4" height="1"/>
+                <rect x="13" y="18" width="2" height="1"/><rect x="16" y="17" width="2" height="2"/>
+              </svg>
+            </div>
+            {/* CTA text */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="text-gray-500 text-sm font-semibold text-center px-6 leading-snug">
+                Build your QR code now!
+              </p>
+            </div>
+          </>
+        )}
+
+        {/* Loading spinner */}
+        {!showPlaceholder && isLoading && (
           <div className="w-full h-full flex items-center justify-center bg-gray-50">
             <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
           </div>
         )}
 
         {/* Custom shape: render SVG inline */}
-        {isCustom && customSVG && !isLoading && (
+        {!showPlaceholder && isCustom && customSVG && !isLoading && (
           <div
             style={{ width: PREVIEW, height: PREVIEW }}
             dangerouslySetInnerHTML={{ __html: customSVG.replace(
@@ -149,7 +187,7 @@ export default function QRPreview() {
         )}
 
         {/* Standard: qr-code-styling canvas */}
-        {!isCustom && (
+        {!showPlaceholder && !isCustom && (
           <div
             ref={containerRef}
             style={{
@@ -163,11 +201,6 @@ export default function QRPreview() {
         )}
       </div>
 
-      {!store.data && (
-        <p className="text-gray-400 text-xs text-center">
-          Enter a URL above to generate your QR code
-        </p>
-      )}
       {store.data && (
         <p className="text-gray-400 text-xs text-center truncate max-w-xs">
           {store.data}
