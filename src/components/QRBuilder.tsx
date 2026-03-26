@@ -18,14 +18,38 @@ export default function QRBuilder() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <svg viewBox="0 0 24 24" fill="none" className="w-4.5 h-4.5 text-white">
-                <rect x="3" y="3" width="7" height="7" rx="1" fill="white"/>
-                <rect x="14" y="3" width="7" height="7" rx="1" fill="white"/>
-                <rect x="3" y="14" width="7" height="7" rx="1" fill="white"/>
-                <rect x="14" y="14" width="3" height="3" rx="0.5" fill="white"/>
-                <rect x="18" y="14" width="3" height="3" rx="0.5" fill="white"/>
-                <rect x="14" y="18" width="3" height="3" rx="0.5" fill="white"/>
-                <rect x="18" y="18" width="3" height="3" rx="0.5" fill="white"/>
+              <svg viewBox="0 0 21 21" fill="white" className="w-5 h-5">
+                {/* TL finder ring */}
+                <path fillRule="evenodd" d="M0 0h7v7H0zM1 1h5v5H1z"/>
+                <rect x="2" y="2" width="3" height="3"/>
+                {/* TR finder ring */}
+                <path fillRule="evenodd" d="M14 0h7v7H14zM15 1h5v5H15z"/>
+                <rect x="16" y="2" width="3" height="3"/>
+                {/* BL finder ring */}
+                <path fillRule="evenodd" d="M0 14h7v7H0zM1 15h5v5H1z"/>
+                <rect x="2" y="16" width="3" height="3"/>
+                {/* Timing dots */}
+                <rect x="8" y="6" width="1" height="1"/>
+                <rect x="10" y="6" width="1" height="1"/>
+                <rect x="12" y="6" width="1" height="1"/>
+                <rect x="6" y="8" width="1" height="1"/>
+                <rect x="6" y="10" width="1" height="1"/>
+                <rect x="6" y="12" width="1" height="1"/>
+                {/* Data modules */}
+                <rect x="8" y="8" width="2" height="1"/>
+                <rect x="11" y="8" width="2" height="1"/>
+                <rect x="14" y="9" width="2" height="1"/>
+                <rect x="8" y="10" width="1" height="2"/>
+                <rect x="10" y="10" width="3" height="1"/>
+                <rect x="14" y="10" width="2" height="2"/>
+                <rect x="9" y="12" width="2" height="2"/>
+                <rect x="13" y="12" width="1" height="2"/>
+                <rect x="16" y="12" width="2" height="2"/>
+                <rect x="8" y="15" width="2" height="2"/>
+                <rect x="11" y="14" width="1" height="3"/>
+                <rect x="13" y="15" width="4" height="1"/>
+                <rect x="13" y="18" width="2" height="1"/>
+                <rect x="16" y="17" width="2" height="2"/>
               </svg>
             </div>
             <span className="font-heading font-bold text-lg text-gray-900">QRcraft</span>
